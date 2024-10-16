@@ -36,15 +36,15 @@ public class UserController {
     }
 
     // 3. 큐 상태 확인 API
-    @GetMapping("/queue/{userId}/{concertId}")
-    public ResponseEntity<Object> addToQueueAndCheckStatus(@PathVariable String userId, @PathVariable String concertId) {
-        if (userId.isEmpty() || concertId.isEmpty()) {
+    @GetMapping("/queue/{userId}")
+    public ResponseEntity<Object> addToQueueAndCheckStatus(@PathVariable String userId) {
+        if (userId.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        if (userId.equals("testUserId") && concertId.equals("testConcertId")) {
-            return ResponseEntity.ok().body("{ \"queueId\": \"some-queue-id\" }");
+        if (userId.equals("testUserId")) {
+            return ResponseEntity.ok().body("{ \"queueId\": \"some-queue-id\", \"queueStatus\": \"STANDBY\" }");
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{ \"error\": \"No queue with state 'SUCCESS' found for this user\" }");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{ \"error\": \"No queue with state 'STANDBY' found for this user\" }");
     }
 
 }
