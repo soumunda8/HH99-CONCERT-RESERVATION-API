@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.modelmapper.ModelMapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -27,9 +26,6 @@ public class UserServiceTest {
 
     @Mock
     private UserPointHistoryRepository userPointHistoryRepository;
-
-    @Mock
-    private ModelMapper modelMapper;
 
     @InjectMocks
     private UserService userService;
@@ -124,6 +120,66 @@ public class UserServiceTest {
         });
 
         assertEquals("Database error", exception.getMessage());
+    }
+
+    // 성공 케이스 01 - 대기열 테이블 내 사용자 추가
+    @Test
+    void successAddUserToQueue() {
+        // Given
+        String userId = USER_ID;
+
+        when(userQueueRepository.checkIfUserInQueueWithStatus(userId, QueueStatus.EXPIRE.name())).thenReturn(false);
+        when(userQueueRepository.checkIfUserInQueue(userId)).thenReturn(false);
+
+        // When
+        userService.addQueue(userId);
+
+        // Then
+        verify(userQueueRepository).save(any(UserQueueEntity.class));
+    }
+
+    // 성공 케이스 02 - 대기열 테이블 내 사용자 상태 변경
+    @Test
+    void successUpdateQueueStatus() {
+        // Given
+        String userId = USER_ID;
+
+        when(userQueueRepository.checkIfUserInQueueWithStatus(userId, QueueStatus.EXPIRE.name())).thenReturn(true);
+
+        UserQueueEntity userQueueEntity = UserQueueEntity.builder()
+                .queueId(1L)
+                .userId(userId)
+                .queueStatus(QueueStatus.EXPIRE.name())
+                .build();
+        when(userQueueRepository.getQueueInfo(userId)).thenReturn(userQueueEntity);
+
+        // When
+        userService.addQueue(userId);
+
+        // Then
+        verify(userQueueRepository).save(any(UserQueueEntity.class));
+    }
+
+    // 성공 케이스 03 - 폴링용 API
+    @Test
+    void successCountQueues() {
+        // Given
+        String userId = USER_ID;
+
+        UserQueueEntity userQueueEntity = UserQueueEntity.builder()
+                .queueId(1L)
+                .userId(userId)
+                .queueStatus(QueueStatus.STANDBY.name())
+                .build();
+
+        when(userQueueRepository.getQueueInfo(userId)).thenReturn(userQueueEntity);
+        when(userQueueRepository.countByQueue(userQueueEntity.getCreateAt())).thenReturn(5);
+
+        // When
+        int queueCount = userService.countQueues(userId);
+
+        // Then
+        assertEquals(5, queueCount);
     }
 
 }
