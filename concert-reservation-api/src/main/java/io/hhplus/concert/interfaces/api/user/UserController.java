@@ -1,6 +1,7 @@
 package io.hhplus.concert.interfaces.api.user;
 
 import io.hhplus.concert.application.user.UserService;
+import io.hhplus.concert.utils.ValidationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +19,7 @@ public class UserController {
     // 1. 대기열 등록 API
     @PostMapping("/{userId}")
     public ResponseEntity<Void> addQueue(@PathVariable String userId) {
-        if (userId == null || userId.isEmpty()) {
-            throw new IllegalArgumentException("아이디가 없습니다. 아이디를 확인해주세요.");
-        }
+        ValidationUtils.validateUserId(userId);
         userService.addQueue(userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -45,9 +44,7 @@ public class UserController {
     // 3. 대기열 상태 확인 API
     @GetMapping("/queue/{userId}")
     public ResponseEntity<Integer> checkQueueStatus(@PathVariable String userId) {
-        if (userId == null || userId.isEmpty()) {
-            throw new IllegalArgumentException("아이디가 없습니다. 아이디를 확인해주세요.");
-        }
+        ValidationUtils.validateUserId(userId);
 
         try {
             int count = userService.countQueues(userId);
