@@ -19,7 +19,4 @@ public class BaseEntity {
     @Column(updatable = false, nullable = false)
     private LocalDateTime createAt;
 
-    @Column(nullable = false)
-    private LocalDateTime expireAt;
-
 }

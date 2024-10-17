@@ -30,4 +30,7 @@ public class ReservationEntity extends BaseEntity {
     @Column(nullable = false)
     private String reservationStatus;
 
+    @Column
+    private LocalDateTime reservationExpireAt;
+
 }

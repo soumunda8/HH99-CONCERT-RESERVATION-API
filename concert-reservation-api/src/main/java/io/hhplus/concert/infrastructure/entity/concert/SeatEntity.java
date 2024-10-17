@@ -33,4 +33,7 @@ public class SeatEntity extends BaseEntity {
     @Column(nullable = false)
     private String userId;
 
+    @Column
+    private LocalDateTime seatExpireAt;
+
 }

@@ -1,7 +1,5 @@
 package io.hhplus.concert.infrastructure.entity.user;
 
-import io.hhplus.concert.domain.user.PointActionType;
-import io.hhplus.concert.infrastructure.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
