@@ -128,14 +128,21 @@ public class UserServiceTest {
         // Given
         String userId = USER_ID;
 
-        when(userQueueRepository.checkIfUserInQueueWithStatus(userId, QueueStatus.EXPIRE.name())).thenReturn(false);
+        when(userQueueRepository.checkIfUserInQueueWithStatus(userId, QueueStatus.EXPIRE.name())).thenReturn(true);
+
+        UserQueueEntity userQueueEntity = new UserQueueEntity();
+        when(userQueueRepository.getQueueInfo(userId)).thenReturn(userQueueEntity);
+
         when(userQueueRepository.checkIfUserInQueue(userId)).thenReturn(false);
 
         // When
         userService.addQueue(userId);
 
         // Then
-        verify(userQueueRepository).save(any(UserQueueEntity.class));
+        verify(userQueueRepository, times(1)).save(any(UserQueueEntity.class));
+
+        verify(userQueueRepository, times(1)).checkIfUserInQueueWithStatus(userId, QueueStatus.EXPIRE.name());
+        verify(userQueueRepository, times(1)).checkIfUserInQueue(userId);
     }
 
     // 성공 케이스 02 - 대기열 테이블 내 사용자 상태 변경
@@ -151,6 +158,7 @@ public class UserServiceTest {
                 .userId(userId)
                 .queueStatus(QueueStatus.EXPIRE.name())
                 .build();
+
         when(userQueueRepository.getQueueInfo(userId)).thenReturn(userQueueEntity);
 
         // When
