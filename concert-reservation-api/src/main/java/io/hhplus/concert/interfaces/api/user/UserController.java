@@ -1,5 +1,6 @@
 package io.hhplus.concert.interfaces.api.user;
 
+import io.hhplus.concert.application.user.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,13 +9,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/user")
 public class UserController {
 
-    // 1. 사용자 등록 API
-    @PostMapping("/{userId}/{concertId}")
-    public ResponseEntity<Void> registerUser(@PathVariable String userId, @PathVariable String concertId) {
+    private final UserService userService;
 
-        if (userId.isEmpty() || concertId.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    // 1. 대기열 등록 API
+    @PostMapping("/{userId}")
+    public ResponseEntity<Void> addQueue(@PathVariable String userId) {
+        if (userId == null || userId.isEmpty()) {
+            throw new IllegalArgumentException("아이디가 없습니다. 아이디를 확인해주세요.");
         }
+        userService.addQueue(userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -35,16 +42,19 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{ \"error\": \"InvalidRequest\", \"message\": \"Action not supported.\" }");
     }
 
-    // 3. 큐 상태 확인 API
+    // 3. 대기열 상태 확인 API
     @GetMapping("/queue/{userId}")
-    public ResponseEntity<Object> addToQueueAndCheckStatus(@PathVariable String userId) {
-        if (userId.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Integer> checkQueueStatus(@PathVariable String userId) {
+        if (userId == null || userId.isEmpty()) {
+            throw new IllegalArgumentException("아이디가 없습니다. 아이디를 확인해주세요.");
         }
-        if (userId.equals("testUserId")) {
-            return ResponseEntity.ok().body("{ \"queueId\": \"some-queue-id\", \"queueStatus\": \"STANDBY\" }");
+
+        try {
+            int count = userService.countQueues(userId);
+            return ResponseEntity.ok(count);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{ \"error\": \"No queue with state 'STANDBY' found for this user\" }");
     }
 
 }
