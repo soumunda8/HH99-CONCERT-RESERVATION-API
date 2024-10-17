@@ -5,6 +5,7 @@ import io.hhplus.concert.infrastructure.entity.concert.SeatEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class SeatRepositoryImpl implements SeatRepository {
@@ -19,4 +20,15 @@ public class SeatRepositoryImpl implements SeatRepository {
     public List<SeatEntity> getSeatStatusDONE(Long concertScheduleId, String seatStatus) {
         return jpaSeatRepository.findByConcertScheduleIdAndSeatStatus(concertScheduleId, seatStatus);
     }
+
+    @Override
+    public Optional<SeatEntity> chekcSeatNumberStatus(Long seatNumber) {
+        return jpaSeatRepository.findBySeatNumber(seatNumber);
+    }
+
+    @Override
+    public SeatEntity save(SeatEntity seatEntity) {
+        return jpaSeatRepository.save(seatEntity);
+    }
+
 }

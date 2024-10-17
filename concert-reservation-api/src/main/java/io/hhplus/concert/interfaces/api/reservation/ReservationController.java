@@ -1,5 +1,6 @@
 package io.hhplus.concert.interfaces.api.reservation;
 
+import io.hhplus.concert.application.facade.ReserveFacade;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,17 +9,26 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/reservations")
 public class ReservationController {
 
+    private final ReserveFacade reserveFacade;
+
+    public ReservationController(ReserveFacade reserveFacade) {
+        this.reserveFacade = reserveFacade;
+    }
+
     // 1. 좌석 예약 API
-    @PostMapping("/reserve/{seatId}")
-    public ResponseEntity<Object> reserveSeat(@PathVariable int seatId, @RequestHeader("Authorization") String queueId) {
-        if (seatId <= 0 || queueId == null || !queueId.startsWith("Bearer ")) {
+    @PostMapping("/reserve/{seatNumber}/{concertScheduleId}")
+    public ResponseEntity<Long> reserveSeat(@PathVariable Long seatNumber, @PathVariable Long concertScheduleId, @RequestHeader("Authorization") String authorizationHeader) {
+
+        if (seatNumber <= 0 || authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        if (seatId == 1) {
-            return ResponseEntity.ok().body("{ \"reservationId\": 123 }");
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{ \"error\": \"SeatUnavailable\", \"message\": \"The seat is already reserved or unavailable.\" }");
+
+        String userId = authorizationHeader.substring(7);
+
+        Long seatId = reserveFacade.reserveSeat(seatNumber, concertScheduleId, userId);
+        return new ResponseEntity<>(seatId, HttpStatus.OK);
     }
+
 
     // 2. 결제 완료 API
     @PostMapping("/payment/{reservationId}")

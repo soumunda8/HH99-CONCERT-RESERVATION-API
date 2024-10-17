@@ -1,12 +1,13 @@
 package io.hhplus.concert.application.concert;
 
+import io.hhplus.concert.domain.concert.Seat;
 import io.hhplus.concert.domain.concert.SeatStatus;
 import io.hhplus.concert.domain.repository.concert.ConcertRepository;
 import io.hhplus.concert.domain.repository.concert.ConcertScheduleRepository;
 import io.hhplus.concert.domain.repository.concert.SeatRepository;
 import io.hhplus.concert.infrastructure.entity.concert.ConcertScheduleEntity;
 import io.hhplus.concert.infrastructure.entity.concert.SeatEntity;
-import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +20,12 @@ import java.util.stream.Collectors;
 @Service
 public class ConcertService {
 
-    private final ModelMapper modelMapper;
     private final ConcertRepository concertRepository;
     private final ConcertScheduleRepository concertScheduleRepository;
     private final SeatRepository seatRepository;
 
-    public ConcertService(ModelMapper modelMapper, ConcertRepository concertRepository, ConcertScheduleRepository concertScheduleRepository, SeatRepository seatRepository) {
-        this.modelMapper = modelMapper;
+    @Autowired
+    public ConcertService(ConcertRepository concertRepository, ConcertScheduleRepository concertScheduleRepository, SeatRepository seatRepository) {
         this.concertRepository = concertRepository;
         this.concertScheduleRepository = concertScheduleRepository;
         this.seatRepository = seatRepository;
@@ -57,6 +57,34 @@ public class ConcertService {
         response.put("reservedSeatNumbers", reservedSeatNumbers);
 
         return response;
+    }
+
+    public Seat addSeatStatus(Long seatNumber, Long concertScheduleId, String userId) {
+        SeatEntity seatEntity = seatRepository.chekcSeatNumberStatus(seatNumber).orElseThrow(() -> new IllegalArgumentException("좌석을 찾을 수 없습니다."));
+
+        if (seatEntity.getSeatStatus().equals(SeatStatus.DONE.name())) {
+            throw new IllegalArgumentException("이미 예약된 좌석입니다.");
+        }
+
+        SeatEntity uploadSeatInfo = SeatEntity.builder()
+                .concertScheduleId(concertScheduleId)
+                .seatNumber(seatNumber)
+                .seatStatus(SeatStatus.HELD.name())
+                .userId(userId)
+                .seatExpireAt(LocalDateTime.now().plusMinutes(10))
+                .build();
+        SeatEntity seatInfo = seatRepository.save(uploadSeatInfo);
+
+        Seat seat = new Seat();
+        seat.setSeatId(seatInfo.getSeatId());
+        seat.setConcertScheduleId(seatInfo.getConcertScheduleId());
+        seat.setSeatNumber(seatInfo.getSeatNumber());
+        seat.setSeatStatus(SeatStatus.valueOf(seatInfo.getSeatStatus()));
+        seat.setUserId(seatInfo.getUserId());
+        seat.setCreateAt(seatInfo.getCreateAt());
+        seat.setExpireAt(seatInfo.getSeatExpireAt());
+
+        return seat;
     }
 
 }
