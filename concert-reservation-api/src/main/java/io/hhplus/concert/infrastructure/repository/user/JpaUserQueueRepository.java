@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 public interface JpaUserQueueRepository extends JpaRepository<UserQueueEntity, Long> {
 
     boolean existsByUserId(String userId);
+
     boolean existsByUserIdAndQueueStatusNot(String userId, String queueStatus);
+
     UserQueueEntity findByUserId(String userId);
 
     @Query("SELECT COUNT(u) FROM UserQueueEntity u WHERE u.queueStatus IN ('STANDBY', 'ACTIVE') AND u.createAt < :createAt")

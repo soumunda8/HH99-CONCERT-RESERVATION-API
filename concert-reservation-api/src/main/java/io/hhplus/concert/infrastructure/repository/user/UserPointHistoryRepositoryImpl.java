@@ -1,7 +1,6 @@
 package io.hhplus.concert.infrastructure.repository.user;
 
 import io.hhplus.concert.domain.repository.user.UserPointHistoryRepository;
-import io.hhplus.concert.domain.repository.user.UserRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository

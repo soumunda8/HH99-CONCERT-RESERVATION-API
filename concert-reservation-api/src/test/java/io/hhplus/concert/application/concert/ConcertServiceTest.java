@@ -1,7 +1,5 @@
 package io.hhplus.concert.application.concert;
 
-import io.hhplus.concert.domain.concert.ConcertSchedule;
-import io.hhplus.concert.domain.concert.Seat;
 import io.hhplus.concert.domain.concert.SeatStatus;
 import io.hhplus.concert.domain.repository.concert.ConcertRepository;
 import io.hhplus.concert.domain.repository.concert.ConcertScheduleRepository;

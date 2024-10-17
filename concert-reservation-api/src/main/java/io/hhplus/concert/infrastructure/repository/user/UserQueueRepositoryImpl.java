@@ -1,7 +1,6 @@
 package io.hhplus.concert.infrastructure.repository.user;
 
 import io.hhplus.concert.domain.repository.user.UserQueueRepository;
-import io.hhplus.concert.domain.user.UserQueue;
 import io.hhplus.concert.infrastructure.entity.user.UserQueueEntity;
 import org.springframework.stereotype.Repository;
 
