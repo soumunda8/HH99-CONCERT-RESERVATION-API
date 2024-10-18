@@ -43,4 +43,4 @@
 ### 🔔 [API 명세서](https://github.com/soumunda8/HH99-CONCERT-RESERVATION-API/issues/5)
 
 ### 🔘 [mock API](https://github.com/soumunda8/HH99-CONCERT-RESERVATION-API/issues/6)
-![Swagger](https://github.com/user-attachments/assets/08fe4fc8-6f3c-4b85-a6e5-92dd2898e26c)
+![Swagger](https://github.com/user-attachments/assets/61171986-b02a-4091-b6ee-15bb3e8d32da)

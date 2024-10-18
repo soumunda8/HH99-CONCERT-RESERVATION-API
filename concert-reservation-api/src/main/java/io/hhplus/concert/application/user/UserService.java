@@ -5,10 +5,14 @@ import io.hhplus.concert.domain.repository.user.UserQueueRepository;
 import io.hhplus.concert.domain.repository.user.UserRepository;
 import io.hhplus.concert.domain.user.QueueStatus;
 import io.hhplus.concert.infrastructure.entity.user.UserQueueEntity;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.print.Pageable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -84,6 +88,27 @@ public class UserService {
 
         if (!userQueue.getQueueStatus().equals(QueueStatus.ACTIVE.name())) {
             throw new IllegalArgumentException("사용자가 활성상태가 아닙니다.");
+        }
+    }
+
+    @Scheduled(fixedRate = 60000)
+    public void checkAndActivateQueue() {
+        List<UserQueueEntity> allStandbyUsers = userQueueRepository.getAllStandByList(QueueStatus.STANDBY.name());
+
+        for (UserQueueEntity user : allStandbyUsers) {
+            List<UserQueueEntity> activeUsers = userQueueRepository.getAllActiveByList(user.getCreateAt(), (Pageable) PageRequest.of(0, 10));
+
+            if (activeUsers.size() < 10) {
+                UserQueueEntity tenthUser = activeUsers.size() == 9 ? user : activeUsers.get(9);
+                LocalDateTime expireAt = LocalDateTime.now().plusMinutes(10);
+                UserQueueEntity uploadQueue = UserQueueEntity.builder()
+                        .queueId(tenthUser.getQueueId())
+                        .userId(tenthUser.getUserId())
+                        .queueStatus(QueueStatus.ACTIVE.name())
+                        .queueExpireAt(expireAt)
+                        .build();
+                userQueueRepository.save(uploadQueue);
+            }
         }
     }
 
