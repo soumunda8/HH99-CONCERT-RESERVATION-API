@@ -69,10 +69,9 @@ public class UserController {
     }
 
     // 3. 대기열 상태 확인 API
-    @GetMapping("/queue/{userId}")
-    public ResponseEntity<QueueStatusResponse> checkQueueStatus(@PathVariable String userId) {
-        logger.info("Received request to check queue status for userId: {}", userId);
-        ValidationUtils.validateUserId(userId);
+    @GetMapping("/queue/{userId}/{queueId}")
+    public ResponseEntity<QueueStatusResponse> checkQueueStatus(@PathVariable String userId, @PathVariable Long queueId) {
+        logger.info("Received request to check queue status for userId: {}, queueId: {}", userId, queueId);
 
         try {
             int position = countUserQueueUseCase.execute(userId);

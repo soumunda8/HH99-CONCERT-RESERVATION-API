@@ -38,6 +38,11 @@ public class UserQueueRepositoryImpl implements UserQueueRepository {
     }
 
     @Override
+    public Optional<UserQueueEntity> getQueueInfoById(Long queueId) {
+        return jpaUserQueueRepository.findById(queueId);
+    }
+
+    @Override
     public void addUserQueue(UserQueueEntity userQueue) {
         jpaUserQueueRepository.save(userQueue);
     }

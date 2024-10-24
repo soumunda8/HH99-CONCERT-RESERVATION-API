@@ -84,6 +84,27 @@ public class UserQueueService {
         return convertToDomain(userQueue);
     }
 
+    public UserQueue getUserQueueInfoById(Long queueId) {
+        logger.info("Fetching user queue information for queueId: {}", queueId);
+        UserQueueEntity userQueue = userQueueRepository.getQueueInfoById(queueId)
+                .orElseThrow(() -> {
+                    logger.error("User queue information not found for queueId: {}", queueId);
+                    return new IllegalArgumentException("관련한 정보가 없습니다.");
+                });
+
+        return convertToDomain(userQueue);
+    }
+
+    public boolean isValidQueueToken(Long queueId) {
+        logger.info("Fetching user queue information for queueId: {}", queueId);
+        UserQueue userQueue = getUserQueueInfoById(queueId);
+
+        // queueId가 존재하고, 상태가 유효하며, 만료되지 않았는지 확인
+        return userQueue != null &&
+                !userQueue.getQueueStatus().equals(QueueStatus.EXPIRE.name()) &&
+                userQueue.getQueueExpireAt().isAfter(LocalDateTime.now());
+    }
+
     public void updateQueueStatus(String userId, QueueStatus queueStatus) {
         logger.info("Updating queue status for userId: {} to {}", userId, queueStatus);
         UserQueue userQueue = getUserQueueInfo(userId);
