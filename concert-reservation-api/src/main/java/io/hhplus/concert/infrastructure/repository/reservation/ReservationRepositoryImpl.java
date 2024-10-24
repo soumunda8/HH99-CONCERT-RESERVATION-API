@@ -24,7 +24,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
 
     @Override
     public List<ReservationEntity> getReservationInfoByStatusBooked(String reservationStatusByBooked, LocalDateTime localDateTime) {
-        return jpaReservationRepository.findByReservationStatusAndExpireAtBefore(reservationStatusByBooked, localDateTime);
+        return jpaReservationRepository.findByReservationStatusAndReservationExpireAtBefore(reservationStatusByBooked, localDateTime);
     }
 
     @Override

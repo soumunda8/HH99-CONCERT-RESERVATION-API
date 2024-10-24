@@ -11,6 +11,6 @@ public interface JpaReservationRepository extends JpaRepository<ReservationEntit
 
     Optional<ReservationEntity> getByReservationId(long reservationId);
 
-    List<ReservationEntity> findByReservationStatusAndExpireAtBefore(String reservationStatusByBooked, LocalDateTime localDateTime);
+    List<ReservationEntity> findByReservationStatusAndReservationExpireAtBefore(String reservationStatusByBooked, LocalDateTime localDateTime);
 
 }

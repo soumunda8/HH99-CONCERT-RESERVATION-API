@@ -11,6 +11,7 @@ public interface UserQueueRepository {
     boolean checkIfUserInQueueWithStatus(String userId, String queueStatus);
     boolean checkIfUserInQueue(String userId);
     Optional<UserQueueEntity> getQueueInfo(String userId);
+    Optional<UserQueueEntity> getQueueInfoById(Long queueId);
     void addUserQueue(UserQueueEntity userQueue);
     void removeUserQueueToken(long queueId);
     int countByQueue(LocalDateTime createAt);

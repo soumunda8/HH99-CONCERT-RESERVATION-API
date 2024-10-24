@@ -27,7 +27,7 @@ public class UserQueueEntity extends BaseEntity {
     @Column(nullable = false)
     private String queueStatus;
 
-    @Column
+    @Column(name = "queue_expire_at")
     private LocalDateTime queueExpireAt;
 
 }

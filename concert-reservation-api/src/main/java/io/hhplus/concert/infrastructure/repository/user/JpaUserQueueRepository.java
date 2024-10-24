@@ -23,6 +23,6 @@ public interface JpaUserQueueRepository extends JpaRepository<UserQueueEntity, L
 
     List<UserQueueEntity> findByQueueStatusAndCreateAtBeforeOrderByCreateAtAsc(String queueStatus, LocalDateTime createAt);
 
-    List<UserQueueEntity> findTop10ByQueueStatusAndExpireAtBeforeOrderByExpireAtAsc(String queueStatus, LocalDateTime expireAt);
+    List<UserQueueEntity> findTop10ByQueueStatusAndQueueExpireAtBeforeOrderByQueueExpireAtAsc(String queueStatus, LocalDateTime expireAt);
 
 }
