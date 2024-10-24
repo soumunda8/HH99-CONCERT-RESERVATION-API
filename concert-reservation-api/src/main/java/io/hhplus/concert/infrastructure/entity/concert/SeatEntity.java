@@ -33,7 +33,7 @@ public class SeatEntity extends BaseEntity {
     @Column(nullable = false)
     private String userId;
 
-    @Column
+    @Column(name = "seat_expire_at")
     private LocalDateTime seatExpireAt;
 
 }
