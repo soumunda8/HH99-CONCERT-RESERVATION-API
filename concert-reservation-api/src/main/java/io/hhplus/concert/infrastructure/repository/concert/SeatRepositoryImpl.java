@@ -1,6 +1,6 @@
 package io.hhplus.concert.infrastructure.repository.concert;
 
-import io.hhplus.concert.domain.repository.concert.SeatRepository;
+import io.hhplus.concert.domain.concert.SeatRepository;
 import io.hhplus.concert.infrastructure.entity.concert.SeatEntity;
 import org.springframework.stereotype.Repository;
 
@@ -17,12 +17,22 @@ public class SeatRepositoryImpl implements SeatRepository {
     }
 
     @Override
-    public List<SeatEntity> getSeatStatusDONE(Long concertScheduleId, String seatStatus) {
+    public Optional<SeatEntity> getSeatInfo(Long seatId) {
+        return jpaSeatRepository.findBySeatId(seatId);
+    }
+
+    @Override
+    public List<SeatEntity> getSeatNumberAndSeatStatus(Long concertScheduleId, String seatStatus) {
         return jpaSeatRepository.findByConcertScheduleIdAndSeatStatus(concertScheduleId, seatStatus);
     }
 
     @Override
-    public Optional<SeatEntity> chekcSeatNumberStatus(Long seatNumber) {
+    public SeatEntity getSeatNumberAndSeatNumber(Long concertScheduleId, Long seatNumber) {
+        return jpaSeatRepository.findByConcertScheduleIdAndSeatNumber(concertScheduleId, seatNumber);
+    }
+
+    @Override
+    public Optional<SeatEntity> checkSeatNumberStatus(Long seatNumber) {
         return jpaSeatRepository.findBySeatNumber(seatNumber);
     }
 

@@ -17,6 +17,6 @@ public class UserQueue {
 
     private LocalDateTime createAt;
 
-    private LocalDateTime expireAt;
+    private LocalDateTime queueExpireAt;
 
 }

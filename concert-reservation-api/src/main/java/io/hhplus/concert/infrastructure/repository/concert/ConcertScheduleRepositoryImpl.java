@@ -1,6 +1,6 @@
 package io.hhplus.concert.infrastructure.repository.concert;
 
-import io.hhplus.concert.domain.repository.concert.ConcertScheduleRepository;
+import io.hhplus.concert.domain.concert.ConcertScheduleRepository;
 import io.hhplus.concert.infrastructure.entity.concert.ConcertScheduleEntity;
 import org.springframework.stereotype.Repository;
 

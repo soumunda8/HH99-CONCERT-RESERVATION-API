@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface JpaUserQueueRepository extends JpaRepository<UserQueueEntity, Long> {
 
@@ -15,14 +16,13 @@ public interface JpaUserQueueRepository extends JpaRepository<UserQueueEntity, L
 
     boolean existsByUserIdAndQueueStatusNot(String userId, String queueStatus);
 
-    UserQueueEntity findByUserId(String userId);
+    Optional<UserQueueEntity> findByUserId(String userId);
 
     @Query("SELECT COUNT(u) FROM UserQueueEntity u WHERE u.queueStatus IN ('STANDBY', 'ACTIVE') AND u.createAt < :createAt")
     int countByQueue(@Param("createAt") LocalDateTime createAt);
 
-    List<UserQueueEntity> findByQueueStatus(String queueStatus);
+    List<UserQueueEntity> findByQueueStatusAndCreateAtBeforeOrderByCreateAtAsc(String queueStatus, LocalDateTime createAt);
 
-    @Query("SELECT u FROM UserQueueEntity u WHERE u.queueStatus = 'ACTIVE' AND u.createAt < :queueCreateAt ORDER BY u.createAt ASC")
-    List<UserQueueEntity> findActiveUsersBefore(@Param("createAt") LocalDateTime createAt, Pageable pageable);
+    List<UserQueueEntity> findTop10ByQueueStatusAndExpireAtBeforeOrderByExpireAtAsc(String queueStatus, LocalDateTime expireAt);
 
 }
