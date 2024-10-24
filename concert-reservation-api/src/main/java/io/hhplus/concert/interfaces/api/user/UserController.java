@@ -1,6 +1,10 @@
 package io.hhplus.concert.interfaces.api.user;
 
-import io.hhplus.concert.application.user.UserService;
+import io.hhplus.concert.application.user.*;
+import io.hhplus.concert.domain.user.PointActionType;
+import io.hhplus.concert.domain.user.User;
+import io.hhplus.concert.interfaces.dto.PointsResponse;
+import io.hhplus.concert.interfaces.dto.QueueStatusResponse;
 import io.hhplus.concert.utils.ValidationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +14,17 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/user")
 public class UserController {
 
+    private final AddUserToQueueUseCase addUserToQueueUseCase;
+    private final ManageUserPointsUseCase manageUserPointsUseCase;
+    private final CheckUserStatusUseCase checkUserStatusUseCase;
+    private final CountUserQueueUseCase countUserQueueUseCase;
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public UserController(AddUserToQueueUseCase addUserToQueueUseCase, ManageUserPointsUseCase manageUserPointsUseCase, CheckUserStatusUseCase checkUserStatusUseCase, CountUserQueueUseCase countUserQueueUseCase, UserService userService) {
+        this.addUserToQueueUseCase = addUserToQueueUseCase;
+        this.manageUserPointsUseCase = manageUserPointsUseCase;
+        this.checkUserStatusUseCase = checkUserStatusUseCase;
+        this.countUserQueueUseCase = countUserQueueUseCase;
         this.userService = userService;
     }
 
@@ -20,35 +32,38 @@ public class UserController {
     @PostMapping("/{userId}")
     public ResponseEntity<Void> addQueue(@PathVariable String userId) {
         ValidationUtils.validateUserId(userId);
-        userService.addQueue(userId);
+        addUserToQueueUseCase.execute(userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     // 2. 포인트 조회/충전 API
     @PostMapping("/points/{userId}")
-    public ResponseEntity<Object> managePoints(@PathVariable String userId, @RequestParam String actionType, @RequestParam int amount) {
+    public ResponseEntity<PointsResponse> managePoints(@PathVariable String userId, @RequestParam String actionType, @RequestParam int amount) {
+        ValidationUtils.validateUserId(userId);
+        userService.addUser(userId);
 
-        if (userId.isEmpty() || (!actionType.equals("check") && !actionType.equals("recharge"))) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{ \"error\": \"InvalidRequest\", \"message\": \"Invalid actionType or missing/invalid amount for recharge.\" }");
+        if (!actionType.equals(PointActionType.USE) && !actionType.equals(PointActionType.CHARGE)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
-        if (actionType.equals("check")) {
-            return ResponseEntity.ok().body("{ \"userId\": \"" + userId + "\", \"currentPoints\": 1000 }");
-        } else if (actionType.equals("recharge")) {
-            return ResponseEntity.ok().body("{ \"userId\": \"" + userId + "\", \"currentPoints\": " + (1000 + amount) + " }");
+        try {
+            User user = manageUserPointsUseCase.execute(userId, actionType, amount);
+            PointsResponse response = new PointsResponse(userId, actionType, amount, user.getPoints());
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
         }
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{ \"error\": \"InvalidRequest\", \"message\": \"Action not supported.\" }");
     }
 
     // 3. 대기열 상태 확인 API
     @GetMapping("/queue/{userId}")
-    public ResponseEntity<Integer> checkQueueStatus(@PathVariable String userId) {
+    public ResponseEntity<QueueStatusResponse> checkQueueStatus(@PathVariable String userId) {
         ValidationUtils.validateUserId(userId);
 
         try {
-            int count = userService.countQueues(userId);
-            return ResponseEntity.ok(count);
+            int position = countUserQueueUseCase.execute(userId);
+            QueueStatusResponse response = new QueueStatusResponse(userId, position);
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);
         }

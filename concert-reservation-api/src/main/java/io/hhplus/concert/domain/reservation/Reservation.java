@@ -19,6 +19,6 @@ public class Reservation {
 
     private LocalDateTime createAt;
 
-    private LocalDateTime expireAt;
+    private LocalDateTime reservationExpireAt;
 
 }

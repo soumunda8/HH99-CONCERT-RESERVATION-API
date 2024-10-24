@@ -1,7 +1,7 @@
 package io.hhplus.concert.infrastructure.config;
 
-import io.hhplus.concert.domain.repository.concert.ConcertRepository;
-import io.hhplus.concert.domain.repository.concert.ConcertScheduleRepository;
+import io.hhplus.concert.domain.concert.ConcertRepository;
+import io.hhplus.concert.domain.concert.ConcertScheduleRepository;
 import io.hhplus.concert.infrastructure.entity.concert.ConcertEntity;
 import io.hhplus.concert.infrastructure.entity.concert.ConcertScheduleEntity;
 import org.springframework.boot.CommandLineRunner;

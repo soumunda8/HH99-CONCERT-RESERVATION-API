@@ -1,6 +1,7 @@
 package io.hhplus.concert.infrastructure.repository.user;
 
-import io.hhplus.concert.domain.repository.user.UserPointHistoryRepository;
+import io.hhplus.concert.domain.user.UserPointHistoryRepository;
+import io.hhplus.concert.infrastructure.entity.user.UserPointHistoryEntity;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -12,4 +13,8 @@ public class UserPointHistoryRepositoryImpl implements UserPointHistoryRepositor
         this.jpaUserPointHistoryRepository = jpaUserPointHistoryRepository;
     }
 
+    @Override
+    public void addInfo(UserPointHistoryEntity userPointHistoryEntity) {
+        jpaUserPointHistoryRepository.save(userPointHistoryEntity);
+    }
 }

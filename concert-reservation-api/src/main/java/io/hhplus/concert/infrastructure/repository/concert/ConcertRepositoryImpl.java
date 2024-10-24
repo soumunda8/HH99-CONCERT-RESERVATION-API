@@ -1,8 +1,10 @@
 package io.hhplus.concert.infrastructure.repository.concert;
 
-import io.hhplus.concert.domain.repository.concert.ConcertRepository;
+import io.hhplus.concert.domain.concert.ConcertRepository;
 import io.hhplus.concert.infrastructure.entity.concert.ConcertEntity;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public class ConcertRepositoryImpl implements ConcertRepository {
@@ -11,6 +13,11 @@ public class ConcertRepositoryImpl implements ConcertRepository {
 
     public ConcertRepositoryImpl(JpaConcertRepository jpaConcertRepository) {
         this.jpaConcertRepository = jpaConcertRepository;
+    }
+
+    @Override
+    public Optional<ConcertEntity> getConcertInfo(Long concertId) {
+        return jpaConcertRepository.findByConcertId(concertId);
     }
 
     @Override
