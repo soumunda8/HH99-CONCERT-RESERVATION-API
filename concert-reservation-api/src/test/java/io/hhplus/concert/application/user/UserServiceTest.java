@@ -3,16 +3,9 @@ package io.hhplus.concert.application.user;
 import io.hhplus.concert.domain.user.UserPointHistoryRepository;
 import io.hhplus.concert.domain.user.UserQueueRepository;
 import io.hhplus.concert.domain.user.UserRepository;
-import io.hhplus.concert.domain.user.QueueStatus;
-import io.hhplus.concert.infrastructure.entity.user.UserQueueEntity;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
 
 public class UserServiceTest {
 

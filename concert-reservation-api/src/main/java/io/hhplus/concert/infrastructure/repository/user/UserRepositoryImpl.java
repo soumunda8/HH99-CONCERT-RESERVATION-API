@@ -26,6 +26,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<UserEntity> getUserInfoForUpdate(String userId) {
+        return jpaUserRepository.findByUserIdForUpdate(userId);
+    }
+
+    @Override
     public UserEntity changeUserInfo(UserEntity userEntity) {
         return jpaUserRepository.save(userEntity);
     }

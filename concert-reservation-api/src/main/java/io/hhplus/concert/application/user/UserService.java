@@ -6,6 +6,9 @@ import io.hhplus.concert.infrastructure.entity.user.UserEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -62,14 +65,34 @@ public class UserService {
         return getUserInfo(userId);
     }
 
+    @Transactional
     public User addUserDB(String userId, Long amount) {
         logger.debug("Adding user to database with userId: {}, amount: {}", userId, amount);
 
+        /*
         UserEntity uploadUserEntity = UserEntity.builder()
                 .userId(userId)
                 .points(amount)
                 .build();
         UserEntity userEntity = userRepository.changeUserInfo(uploadUserEntity);
+        */
+        Optional<UserEntity> existingUserEntity = userRepository.getUserInfoForUpdate(userId);
+
+        UserEntity userEntity;
+        if (existingUserEntity.isPresent()) {
+            UserEntity user = existingUserEntity.get();
+            userEntity = UserEntity.builder()
+                    .userId(user.getUserId())
+                    .points(user.getPoints() + amount)
+                    .build();
+        } else {
+            userEntity = UserEntity.builder()
+                    .userId(userId)
+                    .points(amount)
+                    .build();
+        }
+
+        userRepository.changeUserInfo(userEntity);
 
         User user = convertToDomain(userEntity);
         logger.debug("User added to database successfully: {}", user);
