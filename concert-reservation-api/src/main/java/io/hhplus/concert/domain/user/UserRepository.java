@@ -8,5 +8,7 @@ public interface UserRepository {
 
     UserEntity addUser(UserEntity userEntity);
     Optional<UserEntity> getUserInfo(String userId);
+    Optional<UserEntity> getUserInfoForUpdate(String userId);
     UserEntity changeUserInfo(UserEntity userEntity);
+
 }
