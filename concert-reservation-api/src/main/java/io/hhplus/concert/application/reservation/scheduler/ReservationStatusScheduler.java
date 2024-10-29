@@ -19,15 +19,14 @@ public class ReservationStatusScheduler {
 
     @Scheduled(fixedRate = 60000)
     public void checkAndUpdateReservationStatus() {
-        logger.info("Starting scheduled task to check and update reservation statuses");
+        logger.info("Scheduled task: Checking and updating reservation statuses");
 
         try {
             reservationService.updateExpiredReservations();
-            logger.info("Reservation status update completed successfully");
+            logger.info("Scheduled task completed: Reservation statuses updated successfully");
         } catch (Exception e) {
-            logger.error("Error occurred while updating reservation statuses", e);
+            logger.error("Scheduled task error: Failed to update reservation statuses", e);
         }
-
     }
 
 }

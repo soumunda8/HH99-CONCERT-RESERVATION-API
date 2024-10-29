@@ -22,16 +22,12 @@ public class CountUserQueueUseCase {
 
     @Transactional(readOnly = true)
     public int execute(String userId) {
-        logger.info("Fetching queue information for userId: {}", userId);
+        logger.debug("Starting user count process in queue for userId: {}", userId);
 
         UserQueue userQueue = userQueueService.getUserQueueInfo(userId);
-        LocalDateTime createAt = userQueue.getCreateAt();
+        int userCount = userQueueService.countUsersInQueue(userQueue.getCreateAt());
 
-        logger.debug("User queue createAt timestamp: {}", createAt);
-
-        int userCount = userQueueService.countUsersInQueue(createAt);
-        logger.info("Number of users in the queue with createAt before {}: {}", createAt, userCount);
-
+        logger.debug("User count for userId {} in queue: {}", userId, userCount);
         return userCount;
     }
 

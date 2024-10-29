@@ -47,37 +47,26 @@ public class ProcessPaymentUseCase {
         logger.info("Processing payment for reservationId: {}, userId: {}", reservationId, userId);
 
         Reservation reservation = reservationService.getReservationInfo(reservationId);
-        logger.debug("Reservation info retrieved: {}", reservation);
-
         Seat seat = seatService.getSeatInfo(reservation.getSeatId());
-        logger.debug("Seat info retrieved: {}", seat);
-
         ConcertSchedule concertSchedule = concertScheduleService.getConcertScheduleInfo(seat.getConcertScheduleId());
-        logger.debug("Concert schedule info retrieved: {}", concertSchedule);
-
         Concert concert = concertService.getConcertInfo(concertSchedule.getConcertId());
-        logger.debug("Concert info retrieved: {}", concert);
 
         User user = userService.getUserInfo(userId);
         Long userPoints = user.getPoints();
         Long totalAmount = concert.getConcertPrice();
-        logger.debug("User points: {}, Concert price: {}", userPoints, totalAmount);
 
-        Long usePoint = userPoints - totalAmount;
-        if (usePoint < 0) {
+        if (userPoints < totalAmount) {
             logger.warn("Insufficient points for userId: {}. Required: {}, Available: {}", userId, totalAmount, userPoints);
             throw new IllegalArgumentException("포인트가 부족합니다.");
         }
 
-        userService.updateUsePoints(userId, usePoint);
-        logger.info("Points updated for userId: {}. New balance: {}", userId, usePoint);
-
-        userPointHistoryService.updateUsePointsHistory(userId, usePoint);
-        logger.info("Point history updated for userId: {}", userId);
-
+        userService.updateUsePoints(userId, totalAmount);
+        userPointHistoryService.updateUsePointsHistory(userId, totalAmount);
         reservationService.paidReservationStatus(reservationId);
-        logger.info("Reservation status updated to PAID for reservationId: {}", reservationId);
+
+        logger.info("Payment processed successfully for reservationId: {}, userId: {}. Remaining points: {}", reservationId, userId, userPoints - totalAmount);
 
         return reservationId;
     }
+
 }

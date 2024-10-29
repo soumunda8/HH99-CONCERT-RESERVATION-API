@@ -29,26 +29,27 @@ public class ReserveSeatUseCase {
 
     @Transactional
     public Reservation execute(Long seatNumber, Long concertScheduleId, String userId) {
-        logger.info("Starting seat reservation process for userId: {}, seatNumber: {}, concertScheduleId: {}", userId, seatNumber, concertScheduleId);
+        try {
+            logger.info("Starting seat reservation process for userId: {}, seatNumber: {}, concertScheduleId: {}", userId, seatNumber, concertScheduleId);
 
-        checkUserStatusUseCase.execute(userId);
-        logger.debug("User status checked for userId: {}", userId);
+            checkUserStatusUseCase.execute(userId);
+            AvailableSeatsResponse availableSeatsResponse = checkAvailableSeatsUseCase.execute(concertScheduleId);
 
-        AvailableSeatsResponse availableSeatsResponse = checkAvailableSeatsUseCase.execute(concertScheduleId);
-        logger.debug("Available seats response: {}", availableSeatsResponse);
+            if (availableSeatsResponse == null || availableSeatsResponse.getReservedSeatNumbers().isEmpty()) {
+                logger.warn("No available seats or reservation date invalid for concertScheduleId: {}", concertScheduleId);
+                throw new IllegalArgumentException("예약 불가 날짜");
+            }
 
-        if (availableSeatsResponse == null || availableSeatsResponse.getReservedSeatNumbers().isEmpty()) {
-            logger.warn("No available seats or reservation date invalid for concertScheduleId: {}", concertScheduleId);
-            throw new IllegalArgumentException("예약 불가 날짜");
+            Seat seatInfo = seatService.reserveSeat(seatNumber, concertScheduleId, userId);
+            Reservation reservation = reservationService.addReservation(seatInfo.getSeatId(), userId);
+
+            logger.info("Reservation successfully added for userId: {}, seatId: {}, reservationId: {}", userId, seatInfo.getSeatId(), reservation.getReservationId());
+            return reservation;
+
+        } catch (Exception ex) {
+            logger.error("Error during seat reservation process for userId: {}, seatNumber: {}, concertScheduleId: {}", userId, seatNumber, concertScheduleId, ex);
+            throw ex;
         }
-
-        Seat seatInfo = seatService.reserveSeat(seatNumber, concertScheduleId, userId);
-        logger.info("Seat reserved: seatNumber: {}, concertScheduleId: {}, userId: {}", seatNumber, concertScheduleId, userId);
-
-        Reservation reservation = reservationService.addReservation(seatInfo.getSeatId(), userId);
-        logger.info("Reservation added for userId: {}, seatId: {}, reservationId: {}", userId, seatInfo.getSeatId(), reservation.getReservationId());
-
-        return reservation;
     }
 
 }

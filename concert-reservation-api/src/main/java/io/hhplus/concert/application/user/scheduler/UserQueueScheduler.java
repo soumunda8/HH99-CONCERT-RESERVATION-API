@@ -19,33 +19,31 @@ public class UserQueueScheduler {
 
     @Scheduled(fixedRate = 60000)
     public void execute() {
-        logger.info("Starting UserQueueScheduler execution");
-
-        expireQueues();
-        activateStandbyUsers();
-
-        logger.info("UserQueueScheduler execution completed");
+        try {
+            expireQueues();
+            activateStandbyUsers();
+            logger.info("UserQueueScheduler completed execution successfully");
+        } catch (Exception e) {
+            logger.error("Error during UserQueueScheduler execution", e);
+        }
     }
 
     private void expireQueues() {
-        logger.info("Expiring user queues");
-
         try {
             userQueueService.expireUserQueues();
-            logger.info("User queues expired successfully");
+            logger.debug("User queues expired successfully");
         } catch (Exception e) {
             logger.error("Error occurred while expiring user queues", e);
         }
     }
 
     private void activateStandbyUsers() {
-        logger.info("Activating standby users");
-
         try {
             userQueueService.activateStandbyUsers();
-            logger.info("Standby users activated successfully");
+            logger.debug("Standby users activated successfully");
         } catch (Exception e) {
             logger.error("Error occurred while activating standby users", e);
         }
     }
+
 }

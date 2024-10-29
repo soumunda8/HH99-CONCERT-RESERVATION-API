@@ -30,7 +30,7 @@ public class SeatEntity extends BaseEntity {
     @Column(nullable = false)
     private String seatStatus;
 
-    @Column(nullable = false)
+    @Column
     private String userId;
 
     @Column(name = "seat_expire_at")

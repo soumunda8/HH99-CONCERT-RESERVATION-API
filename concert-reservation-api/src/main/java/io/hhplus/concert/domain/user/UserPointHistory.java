@@ -1,18 +1,12 @@
 package io.hhplus.concert.domain.user;
 
-import lombok.*;
+public record UserPointHistory(Long userHistoryId, String userId, PointActionType actionType, Long changedPoint) {
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserPointHistory {
-
-    private Long userHistoryId;
-
-    private String userId;
-
-    private PointActionType actionType;
-
-    private Long changedPoint;
+    // 생성자를 통한 초기화
+    public UserPointHistory {
+        if (changedPoint == null || changedPoint <= 0) {
+            throw new IllegalArgumentException("Changed points must be positive.");
+        }
+    }
 
 }

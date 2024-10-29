@@ -27,28 +27,28 @@ public class CheckAvailableSeatsUseCase {
 
     @Transactional(readOnly = true)
     public AvailableSeatsResponse execute(Long concertScheduleId) {
-        logger.info("Checking available seats for concert schedule ID: {}", concertScheduleId);
+        try {
+            logger.info("Checking available seats for concert schedule ID: {}", concertScheduleId);
 
-        ConcertSchedule concertSchedule = concertScheduleService.getConcertScheduleInfo(concertScheduleId);
-        logger.debug("Concert schedule info: {}", concertSchedule);
+            ConcertSchedule concertSchedule = concertScheduleService.getConcertScheduleInfo(concertScheduleId);
+            concertScheduleService.checkReservationDate(concertSchedule);
 
-        concertScheduleService.getReservationDate(concertSchedule);
-        logger.debug("Checked reservation date for concert schedule ID: {}", concertScheduleId);
+            Long remainingSeats = seatService.calculateRemainingSeats(concertScheduleId, concertSchedule.getMaxSeatCount());
+            List<Long> reservedSeatNumbers = seatService.getReservedSeatNumbers(concertScheduleId);
 
-        Long remainingSeats = seatService.calculateRemainingSeats(concertScheduleId, concertSchedule.getMaxSeatCount());
-        logger.debug("Calculated remaining seats: {}", remainingSeats);
+            AvailableSeatsResponse availableSeatsResponse = new AvailableSeatsResponse();
+            availableSeatsResponse.setRemainingSeats(remainingSeats);
+            availableSeatsResponse.setConcertScheduleId(concertScheduleId);
+            availableSeatsResponse.setReservedSeatNumbers(reservedSeatNumbers);
 
-        List<Long> reservedSeatNumbers = seatService.getReservedSeatNumbers(concertScheduleId);
-        logger.debug("Reserved seat numbers for concert schedule ID {}: {}", concertScheduleId, reservedSeatNumbers);
+            logger.info("Available seats response generated successfully for concert schedule ID: {}", concertScheduleId);
 
-        AvailableSeatsResponse availableSeatsResponse = new AvailableSeatsResponse();
-        availableSeatsResponse.setRemainingSeats(remainingSeats);
-        availableSeatsResponse.setConcertScheduleId(concertScheduleId);
-        availableSeatsResponse.setReservedSeatNumbers(reservedSeatNumbers);
+            return availableSeatsResponse;
 
-        logger.info("Available seats response generated successfully for concert schedule ID: {}", concertScheduleId);
-
-        return availableSeatsResponse;
+        } catch (Exception ex) {
+            logger.error("Error checking available seats for concert schedule ID: {}", concertScheduleId, ex);
+            throw ex;
+        }
     }
 
 }

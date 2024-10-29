@@ -1,5 +1,6 @@
 package io.hhplus.concert.infrastructure.entity.user;
 
+import io.hhplus.concert.domain.user.QueueStatus;
 import io.hhplus.concert.infrastructure.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

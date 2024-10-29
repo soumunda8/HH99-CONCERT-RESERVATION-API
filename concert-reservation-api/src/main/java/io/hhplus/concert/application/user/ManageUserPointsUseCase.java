@@ -22,27 +22,28 @@ public class ManageUserPointsUseCase {
 
     @Transactional
     public User execute(String userId, String actionType, long amount) {
-        logger.info("Executing user point management for userId: {}, actionType: {}, amount: {}", userId, actionType, amount);
+        logger.info("Starting point management for userId: {}, actionType: {}", userId, actionType);
 
-        if (actionType.equals("check")) {
-            logger.info("Checking points for userId: {}", userId);
-            return userService.getUserInfo(userId);
-        } else if (actionType.equals(PointActionType.CHARGE.name())) {
-            logger.info("Charging points for userId: {} with amount: {}", userId, amount);
-            User user = userService.updateRechargePoints(userId, amount);
-            userPointHistoryService.updateChargePointsHistory(userId, amount);
-            logger.info("Points charged successfully for userId: {}", userId);
-            return user;
-        } else if (actionType.equals(PointActionType.USE.name())) {
-            logger.info("Using points for userId: {} with amount: {}", userId, amount);
-            User user = userService.updateUsePoints(userId, amount);
-            userPointHistoryService.updateUsePointsHistory(userId, amount);
-            logger.info("Points used successfully for userId: {}", userId);
-            return user;
+        switch (actionType) {
+            case "check":
+                return userService.getUserInfo(userId);
+
+            case "CHARGE":
+                User chargedUser = userService.updateRechargePoints(userId, amount);
+                userPointHistoryService.updateChargePointsHistory(userId, amount);
+                logger.info("Points charged for userId: {}", userId);
+                return chargedUser;
+
+            case "USE":
+                User updatedUser = userService.updateUsePoints(userId, amount);
+                userPointHistoryService.updateUsePointsHistory(userId, amount);
+                logger.info("Points used for userId: {}", userId);
+                return updatedUser;
+
+            default:
+                logger.warn("Unsupported actionType: {} for userId: {}", actionType, userId);
+                throw new IllegalArgumentException("지원되지 않는 actionType입니다.");
         }
-
-        logger.warn("Unsupported actionType: {} for userId: {}", actionType, userId);
-        throw new IllegalArgumentException("지원되지 않는 actionType입니다.");
     }
 
 }
