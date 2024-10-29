@@ -13,9 +13,10 @@ import java.nio.charset.StandardCharsets;
 
 public class LoggingFilter implements Filter {
 
+    private static final Logger logger = LoggerFactory.getLogger(LoggingFilter.class);
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        // 필터 초기화 작업 (필요한 경우)
     }
 
     @Override
@@ -26,29 +27,32 @@ public class LoggingFilter implements Filter {
         ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(httpServletRequest);
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(httpServletResponse);
 
+        logRequest(wrappedRequest); // 요청 시작 로그
+
         try {
             chain.doFilter(wrappedRequest, wrappedResponse);
+            logger.info("Request processing completed successfully for URL: {}", wrappedRequest.getRequestURI()); // 최종 성공 로그
+        } catch (Exception ex) {
+            logger.error("Error during request processing for URL: {}", wrappedRequest.getRequestURI(), ex); // 예외 발생 시 오류 로그
+            throw ex;
         } finally {
-            logRequest(wrappedRequest);
             logResponse(wrappedResponse);
-
             wrappedResponse.copyBodyToResponse();
         }
+    }
+
+    private void logRequest(ContentCachingRequestWrapper request) {
+        String requestBody = new String(request.getContentAsByteArray(), StandardCharsets.UTF_8);
+        logger.info("Starting request: {} {}", request.getMethod(), request.getRequestURI()); // 최초 요청 로그
+    }
+
+    private void logResponse(ContentCachingResponseWrapper response) {
+        String responseBody = new String(response.getContentAsByteArray(), StandardCharsets.UTF_8);
+        logger.info("Response status: {}", response.getStatus()); // 최종 응답 상태 로그
     }
 
     @Override
     public void destroy() {
     }
 
-    private void logRequest(ContentCachingRequestWrapper request) {
-        String requestBody = new String(request.getContentAsByteArray(), StandardCharsets.UTF_8);
-        System.out.println("Request URL: " + request.getMethod() + " " + request.getRequestURI());
-        System.out.println("Request Body: " + requestBody);
-    }
-
-    private void logResponse(ContentCachingResponseWrapper response) {
-        String responseBody = new String(response.getContentAsByteArray(), StandardCharsets.UTF_8);
-        System.out.println("Response Status: " + response.getStatus());
-        System.out.println("Response Body: " + responseBody);
-    }
 }

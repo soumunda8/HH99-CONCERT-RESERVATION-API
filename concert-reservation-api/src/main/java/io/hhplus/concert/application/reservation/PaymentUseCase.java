@@ -27,23 +27,25 @@ public class PaymentUseCase {
     }
 
     public void execute(Long reservationId, String userId) {
-        logger.info("Starting payment process for reservationId: {}, userId: {}", reservationId, userId);
+        logger.info("Payment process started for reservationId: {}, userId: {}", reservationId, userId);
 
-        checkUserStatusUseCase.execute(userId);
-        logger.debug("User status checked for userId: {}", userId);
+        try {
+            checkUserStatusUseCase.execute(userId);
 
-        Reservation reservation = reservationService.getReservationInfo(reservationId);
-        logger.debug("Reservation info retrieved for reservationId: {}", reservationId);
+            Reservation reservation = reservationService.getReservationInfo(reservationId);
+            if (reservation.getReservationExpireAt().isBefore(LocalDateTime.now())) {
+                logger.warn("Payment expired for reservationId: {}", reservationId);
+                throw new IllegalArgumentException("결제 시간 초과");
+            }
 
-        if (reservation.getReservationExpireAt().isBefore(LocalDateTime.now())) {
-            logger.warn("Payment expired for reservationId: {}", reservationId);
-            throw new IllegalArgumentException("결제 시간 초과");
+            processPaymentUseCase.execute(reservationId, userId);
+            userQueueService.removeUserQueueToken(userId);
+            logger.info("Payment completed and user queue token removed for reservationId: {}, userId: {}", reservationId, userId);
+
+        } catch (Exception ex) {
+            logger.error("Error during payment process for reservationId: {}, userId: {}", reservationId, userId, ex);
+            throw ex;
         }
-
-        processPaymentUseCase.execute(reservationId, userId);
-        logger.info("Payment processed successfully for reservationId: {}, userId: {}", reservationId, userId);
-
-        userQueueService.removeUserQueueToken(userId);
-        logger.info("User queue token removed for userId: {}", userId);
     }
+
 }

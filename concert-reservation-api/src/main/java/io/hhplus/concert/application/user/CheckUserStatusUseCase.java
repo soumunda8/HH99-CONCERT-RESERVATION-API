@@ -16,10 +16,8 @@ public class CheckUserStatusUseCase {
     }
 
     public void execute(String userId) {
-        logger.info("Checking if user with userId: {} is active", userId);
-
         if (!userQueueService.isUserActive(userId)) {
-            logger.warn("User with userId: {} is not active", userId);
+            logger.error("User with userId: {} is not active", userId);
             throw new IllegalArgumentException("사용자가 활성 상태가 아닙니다.");
         }
 

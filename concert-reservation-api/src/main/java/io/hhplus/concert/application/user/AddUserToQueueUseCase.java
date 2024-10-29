@@ -21,20 +21,16 @@ public class AddUserToQueueUseCase {
     public void execute(String userId) {
         logger.info("Attempting to add user to queue with userId: {}", userId);
 
-        // 만료된 큐에 있는지 확인 후 대기 상태로 변경
+        // 만료된 큐에 있는 경우 대기 상태로 업데이트
         if (userQueueService.isUserInExpiredQueue(userId)) {
-            logger.info("User with userId: {} found in expired queue, updating to STANDBY", userId);
             userQueueService.standbyUserQueueToken(userId);
         }
 
-        // 사용자가 큐에 없으면 새로 추가
+        // 사용자가 큐에 없으면 추가
         if (!userQueueService.isUserInQueue(userId)) {
-            logger.info("User with userId: {} not found in queue, adding user to queue", userId);
             userService.addUser(userId);
             userQueueService.addUserToQueue(userId);
-            logger.info("User with userId: {} successfully added to queue", userId);
-        } else {
-            logger.info("User with userId: {} already exists in queue", userId);
+            logger.info("User with userId: {} added to queue successfully", userId);
         }
     }
 
