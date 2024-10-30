@@ -9,7 +9,7 @@ public interface SeatRepository {
 
     Optional<SeatEntity> getSeatInfo(Long seatId);
     List<SeatEntity> getSeatNumberAndSeatStatus(Long concertScheduleId, String seatStatus);
-    SeatEntity getSeatNumberAndSeatNumber(Long concertScheduleId, Long seatNumber);
+    Optional<SeatEntity> getSeatNumberAndSeatNumber(Long concertScheduleId, Long seatNumber);
     Optional<SeatEntity> checkSeatNumberStatus(Long seatNumber);
     SeatEntity save(SeatEntity seatEntity);
 

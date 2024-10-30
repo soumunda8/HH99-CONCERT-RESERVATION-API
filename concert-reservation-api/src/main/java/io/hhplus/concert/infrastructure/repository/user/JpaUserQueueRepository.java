@@ -18,8 +18,7 @@ public interface JpaUserQueueRepository extends JpaRepository<UserQueueEntity, L
 
     Optional<UserQueueEntity> findByUserId(String userId);
 
-    @Query("SELECT COUNT(u) FROM UserQueueEntity u WHERE u.queueStatus IN ('STANDBY', 'ACTIVE') AND u.createAt < :createAt")
-    int countByQueue(@Param("createAt") LocalDateTime createAt);
+    int countByQueueStatusInAndCreateAtBefore(List<String> queueStatuses, LocalDateTime createAt);
 
     List<UserQueueEntity> findByQueueStatusAndCreateAtBeforeOrderByCreateAtAsc(String queueStatus, LocalDateTime createAt);
 

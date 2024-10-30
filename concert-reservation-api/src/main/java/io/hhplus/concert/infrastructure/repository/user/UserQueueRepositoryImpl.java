@@ -5,6 +5,7 @@ import io.hhplus.concert.infrastructure.entity.user.UserQueueEntity;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,7 +50,8 @@ public class UserQueueRepositoryImpl implements UserQueueRepository {
 
     @Override
     public int countByQueue(LocalDateTime createAt) {
-        return jpaUserQueueRepository.countByQueue(createAt);
+        List<String> statuses = Arrays.asList("STANDBY", "ACTIVE");
+        return jpaUserQueueRepository.countByQueueStatusInAndCreateAtBefore(statuses, createAt);
     }
 
     @Override

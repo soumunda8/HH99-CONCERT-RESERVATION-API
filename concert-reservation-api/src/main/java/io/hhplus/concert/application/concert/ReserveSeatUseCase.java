@@ -37,7 +37,7 @@ public class ReserveSeatUseCase {
 
             if (availableSeatsResponse == null || availableSeatsResponse.getReservedSeatNumbers().isEmpty()) {
                 logger.warn("No available seats or reservation date invalid for concertScheduleId: {}", concertScheduleId);
-                throw new IllegalArgumentException("예약 불가 날짜");
+                throw new IllegalArgumentException("이미 예약된 좌석입니다.");
             }
 
             Seat seatInfo = seatService.reserveSeat(seatNumber, concertScheduleId, userId);

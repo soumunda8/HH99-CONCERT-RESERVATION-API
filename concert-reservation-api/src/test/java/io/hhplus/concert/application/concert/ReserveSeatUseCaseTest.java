@@ -42,7 +42,7 @@ public class ReserveSeatUseCaseTest {
             reserveSeatUseCase.execute(seatNumber, concertScheduleId, userId);
         });
 
-        assertEquals("좌석을 찾을 수 없습니다.", exception.getMessage());
+        assertEquals("이미 예약된 좌석입니다.", exception.getMessage());
     }
 
     // 이미 예약된 좌석일 때 테스트
@@ -54,7 +54,7 @@ public class ReserveSeatUseCaseTest {
         String userId = "user123";
 
         SeatEntity seat = SeatEntity.builder().seatNumber(seatNumber).seatStatus("RESERVED").build();
-        given(seatRepository.getSeatNumberAndSeatNumber(concertScheduleId, seatNumber)).willReturn(seat);
+        given(seatRepository.getSeatNumberAndSeatNumber(concertScheduleId, seatNumber)).willReturn(Optional.ofNullable(seat));
 
         // When / Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -73,7 +73,7 @@ public class ReserveSeatUseCaseTest {
         String userId = "user123";
 
         SeatEntity seat = SeatEntity.builder().seatNumber(seatNumber).seatStatus("AVAILABLE").build();
-        given(seatRepository.getSeatNumberAndSeatNumber(concertScheduleId, seatNumber)).willReturn(seat);
+        given(seatRepository.getSeatNumberAndSeatNumber(concertScheduleId, seatNumber)).willReturn(Optional.ofNullable(seat));
 
         // When
         reserveSeatUseCase.execute(seatNumber, concertScheduleId, userId);

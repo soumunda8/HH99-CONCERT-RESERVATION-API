@@ -12,7 +12,7 @@ public interface JpaSeatRepository extends JpaRepository<SeatEntity, Long> {
 
     List<SeatEntity> findByConcertScheduleIdAndSeatStatus(Long concertScheduleId, String seatStatus);
 
-    SeatEntity findByConcertScheduleIdAndSeatNumber(Long concertScheduleId, Long seatNumber);
+    Optional<SeatEntity> findByConcertScheduleIdAndSeatNumber(Long concertScheduleId, Long seatNumber);
 
     Optional<SeatEntity> findBySeatNumber(Long seatNumber);
 
