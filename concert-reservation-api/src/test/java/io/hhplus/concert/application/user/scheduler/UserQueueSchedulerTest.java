@@ -47,7 +47,7 @@ public class UserQueueSchedulerTest {
             assertEquals("expireUserQueues failed", e.getMessage());
         }
 
-        verify(userQueueService, never()).activateStandbyUsers();
+        verify(userQueueService, times(1)).activateStandbyUsers();
     }
 
     // 실패 케이스 02 - activateStandbyUsers 호출 시 예외 발생
