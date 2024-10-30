@@ -120,8 +120,8 @@ class ProcessPaymentUseCaseTest {
 
         assertEquals("포인트가 부족합니다.", exception.getMessage());
 
-        verify(userService, never()).updateUsePoints(userId, anyLong());
-        verify(userPointHistoryService, never()).updateUsePointsHistory(userId, anyLong());
+        verify(userService, never()).updateUsePoints(eq(userId), anyLong());
+        verify(userPointHistoryService, never()).updateUsePointsHistory(eq(userId), anyLong());
         verify(reservationService, never()).paidReservationStatus(reservationId);
     }
 }

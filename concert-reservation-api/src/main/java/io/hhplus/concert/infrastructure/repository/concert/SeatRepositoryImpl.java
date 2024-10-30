@@ -27,7 +27,7 @@ public class SeatRepositoryImpl implements SeatRepository {
     }
 
     @Override
-    public SeatEntity getSeatNumberAndSeatNumber(Long concertScheduleId, Long seatNumber) {
+    public Optional<SeatEntity> getSeatNumberAndSeatNumber(Long concertScheduleId, Long seatNumber) {
         return jpaSeatRepository.findByConcertScheduleIdAndSeatNumber(concertScheduleId, seatNumber);
     }
 
