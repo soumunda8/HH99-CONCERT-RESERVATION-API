@@ -39,4 +39,15 @@ public class UserRepositoryImpl implements UserRepository {
     public void removeAllData() {
         jpaUserRepository.deleteAll();;
     }
+
+    @Override
+    public Optional<UserEntity> getUserInfoForPessimisticLock(String userId) {
+        return jpaUserRepository.findByIdWithPessimisticLock(userId);
+    }
+
+    @Override
+    public Optional<UserEntity> getUserInfoForOptimisticLock(String userId) {
+        return jpaUserRepository.findByIdWithOptimisticLock(userId);
+    }
+
 }

@@ -12,4 +12,7 @@ public interface UserRepository {
     UserEntity changeUserInfo(UserEntity userEntity);
     void removeAllData();
 
+    Optional<UserEntity> getUserInfoForPessimisticLock(String userId);
+    Optional<UserEntity> getUserInfoForOptimisticLock(String userId);
+
 }
