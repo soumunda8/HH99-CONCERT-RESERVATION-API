@@ -16,8 +16,7 @@ public class ConcertController {
     private final CheckAvailableSeatsUseCase checkAvailableSeatsUseCase;
     private final ReserveSeatUseCase reserveSeatUseCase;
 
-    public ConcertController(CheckAvailableSeatsUseCase checkAvailableSeatsUseCase,
-                             ReserveSeatUseCase reserveSeatUseCase) {
+    public ConcertController(CheckAvailableSeatsUseCase checkAvailableSeatsUseCase, ReserveSeatUseCase reserveSeatUseCase) {
         this.checkAvailableSeatsUseCase = checkAvailableSeatsUseCase;
         this.reserveSeatUseCase = reserveSeatUseCase;
     }
@@ -31,7 +30,7 @@ public class ConcertController {
         return ResponseEntity.ok(availableSeats);
     }
 
-    // 2. 좌석 예약 처리 API
+    /*// 2. 좌석 예약 처리 API
     @PostMapping("/reserve/{concertScheduleId}/{seatNumber}")
     public ResponseEntity<ReservationResponse> reserveSeat(@PathVariable Long concertScheduleId, @PathVariable Long seatNumber, @RequestParam String userId) {
         ValidationUtils.validateConcertScheduleId(concertScheduleId);
@@ -39,6 +38,6 @@ public class ConcertController {
         Reservation reservation = reserveSeatUseCase.execute(seatNumber, concertScheduleId, userId);
         ReservationResponse response = new ReservationResponse(reservation.getReservationId(), "좌석 예약이 완료되었습니다.");
         return ResponseEntity.ok(response);
-    }
+    }*/
 
 }

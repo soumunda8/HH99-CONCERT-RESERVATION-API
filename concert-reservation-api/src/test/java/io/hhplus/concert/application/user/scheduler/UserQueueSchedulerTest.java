@@ -1,9 +1,8 @@
 package io.hhplus.concert.application.user.scheduler;
 
 import io.hhplus.concert.application.user.UserQueueService;
-import io.hhplus.concert.application.user.scheduler.UserQueueScheduler;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -47,7 +46,7 @@ public class UserQueueSchedulerTest {
             assertEquals("expireUserQueues failed", e.getMessage());
         }
 
-        verify(userQueueService, never()).activateStandbyUsers();
+        verify(userQueueService, times(1)).activateStandbyUsers();
     }
 
     // 실패 케이스 02 - activateStandbyUsers 호출 시 예외 발생

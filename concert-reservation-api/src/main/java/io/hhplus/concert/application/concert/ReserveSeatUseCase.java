@@ -41,7 +41,7 @@ public class ReserveSeatUseCase {
             }
 
             Seat seatInfo = seatService.reserveSeat(seatNumber, concertScheduleId, userId);
-            Reservation reservation = reservationService.addReservation(seatInfo.getSeatId(), userId);
+            Reservation reservation = reservationService.addNewReservation(seatInfo.getSeatId(), userId);
 
             logger.info("Reservation successfully added for userId: {}, seatId: {}, reservationId: {}", userId, seatInfo.getSeatId(), reservation.getReservationId());
             return reservation;

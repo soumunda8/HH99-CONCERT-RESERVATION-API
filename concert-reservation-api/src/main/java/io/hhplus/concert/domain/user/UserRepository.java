@@ -10,5 +10,6 @@ public interface UserRepository {
     Optional<UserEntity> getUserInfo(String userId);
     Optional<UserEntity> getUserInfoForUpdate(String userId);
     UserEntity changeUserInfo(UserEntity userEntity);
+    void removeAllData();
 
 }

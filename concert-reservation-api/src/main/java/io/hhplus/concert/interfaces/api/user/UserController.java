@@ -1,7 +1,6 @@
 package io.hhplus.concert.interfaces.api.user;
 
 import io.hhplus.concert.application.user.*;
-import io.hhplus.concert.domain.user.PointActionType;
 import io.hhplus.concert.domain.user.User;
 import io.hhplus.concert.interfaces.dto.PointsResponse;
 import io.hhplus.concert.interfaces.dto.QueueStatusResponse;
@@ -38,11 +37,10 @@ public class UserController {
 
     // 2. 포인트 조회/충전 API
     @PostMapping("/points/{userId}")
-    public ResponseEntity<PointsResponse> managePoints(@PathVariable String userId, @RequestParam String actionType, @RequestParam int amount) {
+    public ResponseEntity<PointsResponse> managePoints(@PathVariable String userId, @RequestParam String actionType, @RequestParam(defaultValue = "0") int amount) {
         ValidationUtils.validateUserId(userId);
-        userService.addUser(userId);
 
-        if (!actionType.equals(PointActionType.USE.name()) && !actionType.equals(PointActionType.CHARGE.name())) {
+        if (actionType.equals("") || actionType == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 

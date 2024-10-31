@@ -4,8 +4,10 @@ import io.hhplus.concert.domain.reservation.Reservation;
 import io.hhplus.concert.domain.reservation.ReservationRepository;
 import io.hhplus.concert.domain.reservation.ReservationStatus;
 import io.hhplus.concert.infrastructure.entity.reservation.ReservationEntity;
+import io.hhplus.concert.infrastructure.mapper.reservation.ReservationMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -15,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 class ReservationServiceTest {
 
@@ -25,119 +27,161 @@ class ReservationServiceTest {
     @InjectMocks
     private ReservationService reservationService;
 
+    private Long reservationId = 1L;
+    private Long seatId = 100L;
+    private String userId = "user123";
+    private ReservationEntity reservationEntity;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
+        MockitoAnnotations.openMocks(this);
 
-    // 실패 케이스 01 - 예약 정보가 없을 때 예외 발생
-    @Test
-    void testGetReservationInfo_notFound() {
-        Long reservationId = 1L;
-
-        when(reservationRepository.getReservationInfo(reservationId)).thenReturn(Optional.empty());
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            reservationService.getReservationInfo(reservationId);
-        });
-
-        assertEquals("예약 정보를 찾을 수 없습니다.", exception.getMessage());
-        verify(reservationRepository, times(1)).getReservationInfo(reservationId);
-    }
-
-    // 성공 케이스 예약 정보 조회 성공
-    @Test
-    void successGetReservationInfo() {
-        Long reservationId = 1L;
-        ReservationEntity reservationEntity = ReservationEntity.builder()
+        reservationEntity = ReservationEntity.builder()
                 .reservationId(reservationId)
+                .userId(userId)
+                .seatId(seatId)
                 .reservationStatus(ReservationStatus.BOOKED.name())
-                .seatId(100L)
-                .userId("user123")
                 .reservationExpireAt(LocalDateTime.now().plusMinutes(10))
                 .build();
-
-        when(reservationRepository.getReservationInfo(reservationId)).thenReturn(Optional.of(reservationEntity));
-
-        Reservation reservation = reservationService.getReservationInfo(reservationId);
-
-        assertNotNull(reservation);
-        assertEquals(reservationId, reservation.getReservationId());
-        assertEquals(ReservationStatus.BOOKED, reservation.getReservationStatus());
-        assertEquals("user123", reservation.getUserId());
-        verify(reservationRepository, times(1)).getReservationInfo(reservationId);
     }
 
-    // 성공 케이스 - 예약 상태가 만료된 예약들을 업데이트
     @Test
-    void successUpdateExpiredReservations_() {
-        Long reservationId = 1L;
-
+    void updateExpiredReservations_Success() {
         // Given
-        List<ReservationEntity> expiredReservations = List.of(
-                ReservationEntity.builder()
-                        .reservationId(reservationId)
-                        .reservationStatus(ReservationStatus.BOOKED.name())
-                        .seatId(100L)
-                        .userId("user123")
-                        .reservationExpireAt(LocalDateTime.now().minusMinutes(5))
-                        .build()
-        );
+        ReservationEntity expiredReservationEntity = ReservationEntity.builder()
+                .reservationId(reservationId)
+                .userId(userId)
+                .seatId(seatId)
+                .reservationStatus(ReservationStatus.BOOKED.name())
+                .reservationExpireAt(LocalDateTime.now().minusMinutes(1)) // 만료된 시간 설정
+                .build();
 
-        when(reservationRepository.getReservationInfoByStatusBooked(anyString(), any(LocalDateTime.class)))
-                .thenReturn(expiredReservations);
-
-        when(reservationRepository.getReservationInfo(reservationId)).thenReturn(Optional.of(expiredReservations.get(0)));
+        given(reservationRepository.getReservationInfoByStatusBooked(eq(ReservationStatus.BOOKED.name()), any(LocalDateTime.class)))
+                .willReturn(List.of(expiredReservationEntity));
+        given(reservationRepository.getReservationInfo(reservationId)).willReturn(Optional.of(expiredReservationEntity));
 
         // When
         reservationService.updateExpiredReservations();
 
         // Then
-        verify(reservationRepository, times(1)).getReservationInfoByStatusBooked(anyString(), any(LocalDateTime.class));
-        verify(reservationRepository, times(1)).addReservation(any(ReservationEntity.class)); // 상태가 CANCELED로 업데이트되었는지 확인
+        ArgumentCaptor<ReservationEntity> captor = ArgumentCaptor.forClass(ReservationEntity.class);
+        verify(reservationRepository, times(1)).addReservation(captor.capture());
+
+        ReservationEntity updatedEntity = captor.getValue();
+        assertEquals(ReservationStatus.CANCELED.name(), updatedEntity.getReservationStatus());
     }
 
-    // 성공 케이스 - 예약 상태를 취소로 변경
     @Test
-    void successCanceledReservationStatus() {
-        Long reservationId = 1L;
+    void getReservationInfo_Success() {
+        // Given
+        given(reservationRepository.getReservationInfo(reservationId)).willReturn(Optional.of(reservationEntity));
 
+        // When
+        Reservation reservation = reservationService.getReservationInfo(reservationId);
+
+        // Then
+        assertNotNull(reservation);
+        assertEquals(reservationId, reservation.getReservationId());
+        assertEquals(userId, reservation.getUserId());
+        assertEquals(ReservationStatus.BOOKED, reservation.getReservationStatus());
+    }
+
+    @Test
+    void getReservationInfo_Failure_NotFound() {
+        // Given
+        given(reservationRepository.getReservationInfo(reservationId)).willReturn(Optional.empty());
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> reservationService.getReservationInfo(reservationId));
+        assertEquals("예약 정보를 찾을 수 없습니다.", exception.getMessage());
+    }
+
+    @Test
+    void canceledReservationStatus_Success() {
+        // Given
         ReservationEntity reservationEntity = ReservationEntity.builder()
                 .reservationId(reservationId)
-                .reservationStatus(ReservationStatus.BOOKED.name())
-                .seatId(100L)
-                .userId("user123")
-                .build();
-
-        when(reservationRepository.getReservationInfo(reservationId)).thenReturn(Optional.of(reservationEntity));
-
-        reservationService.canceledReservationStatus(reservationId);
-
-        verify(reservationRepository, times(1)).addReservation(any(ReservationEntity.class)); // 상태가 CANCELED로 업데이트되었는지 확인
-    }
-
-    // 성공 케이스 - 예약 추가
-    @Test
-    void successAddReservation() {
-        Long seatId = 100L;
-        String userId = "user123";
-        ReservationEntity reservationEntity = ReservationEntity.builder()
-                .reservationId(1L)
-                .seatId(seatId)
                 .userId(userId)
+                .seatId(seatId)
                 .reservationStatus(ReservationStatus.BOOKED.name())
                 .reservationExpireAt(LocalDateTime.now().plusMinutes(10))
                 .build();
+        given(reservationRepository.getReservationInfo(reservationId)).willReturn(Optional.of(reservationEntity));
 
-        when(reservationRepository.addReservation(any(ReservationEntity.class))).thenReturn(reservationEntity);
+        // When
+        reservationService.canceledReservationStatus(reservationId);
 
-        Reservation reservation = reservationService.addReservation(seatId, userId);
+        // Then
+        ArgumentCaptor<ReservationEntity> captor = ArgumentCaptor.forClass(ReservationEntity.class);
+        verify(reservationRepository, times(1)).addReservation(captor.capture());
 
-        assertNotNull(reservation);
-        assertEquals(1L, reservation.getReservationId());
-        assertEquals(seatId, reservation.getSeatId());
-        assertEquals(userId, reservation.getUserId());
-        assertEquals(ReservationStatus.BOOKED, reservation.getReservationStatus());
-        verify(reservationRepository, times(1)).addReservation(any(ReservationEntity.class));
+        ReservationEntity updatedEntity = captor.getValue();
+        assertEquals(ReservationStatus.CANCELED.name(), updatedEntity.getReservationStatus());
     }
+
+    @Test
+    void paidReservationStatus_Success() {
+        // Given
+        ReservationEntity reservationEntity = ReservationEntity.builder()
+                .reservationId(reservationId)
+                .userId(userId)
+                .seatId(seatId)
+                .reservationStatus(ReservationStatus.BOOKED.name())
+                .reservationExpireAt(LocalDateTime.now().plusMinutes(10))
+                .build();
+        given(reservationRepository.getReservationInfo(reservationId)).willReturn(Optional.of(reservationEntity));
+
+        // When
+        reservationService.paidReservationStatus(reservationId);
+
+        // Then
+        ArgumentCaptor<ReservationEntity> captor = ArgumentCaptor.forClass(ReservationEntity.class);
+        verify(reservationRepository, times(1)).addReservation(captor.capture());
+
+        ReservationEntity updatedEntity = captor.getValue();
+        assertEquals(ReservationStatus.PAID.name(), updatedEntity.getReservationStatus());
+    }
+
+    @Test
+    void updateReservationStatus_Success() {
+        // Given
+        ReservationEntity reservationEntity = ReservationEntity.builder()
+                .reservationId(reservationId)
+                .userId(userId)
+                .seatId(seatId)
+                .reservationStatus(ReservationStatus.BOOKED.name())
+                .reservationExpireAt(LocalDateTime.now().plusMinutes(10))
+                .build();
+        given(reservationRepository.getReservationInfo(reservationId)).willReturn(Optional.of(reservationEntity));
+
+        // When
+        reservationService.updateReservationStatus(reservationId, ReservationStatus.CANCELED);
+
+        // Then
+        ArgumentCaptor<ReservationEntity> captor = ArgumentCaptor.forClass(ReservationEntity.class);
+        verify(reservationRepository, times(1)).addReservation(captor.capture());
+
+        ReservationEntity updatedEntity = captor.getValue();
+        assertEquals(ReservationStatus.CANCELED.name(), updatedEntity.getReservationStatus());
+    }
+
+    @Test
+    void addNewReservation_Success() {
+        // Given
+        Reservation newReservation = new Reservation(null, userId, seatId, ReservationStatus.BOOKED, LocalDateTime.now(), LocalDateTime.now().plusMinutes(10));
+        ReservationEntity newReservationEntity = ReservationMapper.toEntity(newReservation);
+
+        given(reservationRepository.addReservation(any(ReservationEntity.class))).willReturn(newReservationEntity);
+
+        // When
+        Reservation result = reservationService.addNewReservation(seatId, userId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(seatId, result.getSeatId());
+        assertEquals(userId, result.getUserId());
+        assertEquals(ReservationStatus.BOOKED, result.getReservationStatus());
+    }
+
 }

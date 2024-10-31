@@ -1,186 +1,142 @@
 package io.hhplus.concert.application.user;
 
-import io.hhplus.concert.domain.user.UserPointHistoryRepository;
-import io.hhplus.concert.domain.user.UserQueueRepository;
+import io.hhplus.concert.domain.user.User;
 import io.hhplus.concert.domain.user.UserRepository;
+import io.hhplus.concert.infrastructure.entity.user.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class UserServiceTest {
+import java.util.Optional;
 
-    private static final String USER_ID = "user1212";
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.*;
+
+public class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private UserQueueRepository userQueueRepository;
+    @InjectMocks
+    private UserService userService;
 
-    @Mock
-    private UserPointHistoryRepository userPointHistoryRepository;
-
-    /*@InjectMocks
-    private UserService userService;*/
+    private final String userId = "user123";
+    private final long initialPoints = 500L;
+    private final long amountToAdd = 100L;
+    private final long amountToUse = 100L;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
-    /*// 대기열 실패 케이스 01 - 사용자 상태가 EXPIRE 상태가 아닌 경우
     @Test
-    void notExpiredQueueAndNotInQueue() {
+    void getUserInfo_Success() {
         // Given
-        String userId = USER_ID;
-
-        when(userQueueRepository.checkIfUserInQueueWithStatus(userId, QueueStatus.EXPIRE.name())).thenReturn(false);
-
-        when(userQueueRepository.checkIfUserInQueue(userId)).thenReturn(false);
+        UserEntity userEntity = new UserEntity(userId, initialPoints);
+        given(userRepository.getUserInfo(userId)).willReturn(Optional.of(userEntity));
 
         // When
-        userService.addQueue(userId);
+        User result = userService.getUserInfo(userId);
 
         // Then
-        verify(userQueueRepository, never()).save(any(UserQueueEntity.class));
+        assertEquals(userId, result.getUserId());
+        assertEquals(initialPoints, result.getPoints());
     }
 
-    // 대기열 실패 케이스 02 - 대기열 테이블 내 사용자 존재
     @Test
-    void isAlreadyInQueue() {
+    void getUserInfo_Failure_UserNotFound() {
         // Given
-        String userId = USER_ID;
+        given(userRepository.getUserInfo(userId)).willReturn(Optional.empty());
 
-        when(userQueueRepository.checkIfUserInQueueWithStatus(userId, QueueStatus.EXPIRE.name())).thenReturn(false);
-        when(userQueueRepository.checkIfUserInQueue(userId)).thenReturn(true);
+        // When & Then
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> userService.getUserInfo(userId));
+        assertEquals("사용자 정보를 찾을 수가 없습니다.", exception.getMessage());
+    }
+
+    @Test
+    void addUser_Success_NewUser() {
+        // Given
+        given(userRepository.getUserInfoForUpdate(userId)).willReturn(Optional.empty());
 
         // When
-        userService.addQueue(userId);
+        User result = userService.addUser(userId);
 
         // Then
-        verify(userQueueRepository).save(any(UserQueueEntity.class));
+        assertEquals(userId, result.getUserId());
+        assertEquals(0L, result.getPoints());
+        verify(userRepository, times(1)).changeUserInfo(any(UserEntity.class));
     }
 
-    // 대기열 실패 케이스 03 - 대기열 상태 변경 실패
     @Test
-    void failUpdateQueueStatus() {
+    void addUser_Success_ExistingUser() {
         // Given
-        String userId = USER_ID;
-
-        when(userQueueRepository.checkIfUserInQueueWithStatus(userId, QueueStatus.EXPIRE.name())).thenReturn(true);
-
-        UserQueueEntity userQueueEntity = UserQueueEntity.builder()
-                .queueId(1L)
-                .userId(userId)
-                .queueStatus(QueueStatus.EXPIRE.name())
-                .build();
-        when(userQueueRepository.getQueueInfo(userId)).thenReturn(userQueueEntity);
+        UserEntity existingUserEntity = new UserEntity(userId, initialPoints);
+        given(userRepository.getUserInfoForUpdate(userId)).willReturn(Optional.of(existingUserEntity));
 
         // When
-        userService.addQueue(userId);
+        User result = userService.addUserDB(userId, amountToAdd);
 
         // Then
-        verify(userQueueRepository).save(any(UserQueueEntity.class));
+        assertEquals(userId, result.getUserId());
+        assertEquals(initialPoints + amountToAdd, result.getPoints());
+        verify(userRepository, times(1)).changeUserInfo(any(UserEntity.class));
     }
 
-    // 폴링용 API 실패 케이스 01 - 대기열 테이블 내 사용자 없음
     @Test
-    void userNotFound() {
+    void updateRechargePoints_Success() {
         // Given
-        String userId = USER_ID;
-
-        when(userQueueRepository.getQueueInfo(userId)).thenReturn(null);
-
-        // When / Then
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            userService.countQueues(userId);
-        });
-
-        assertEquals("관련한 정보가 없습니다.", exception.getMessage());
-    }
-
-    // 폴링용 API 실패 케이스 02 - 데이터베이스 조회 중 에러
-    @Test
-    void countQueueDatabaseError() {
-        // Given
-        String userId = USER_ID;
-
-        when(userQueueRepository.getQueueInfo(userId)).thenThrow(new RuntimeException("Database error"));
-
-        // When / Then
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            userService.countQueues(userId);
-        });
-
-        assertEquals("Database error", exception.getMessage());
-    }
-
-    // 성공 케이스 01 - 대기열 테이블 내 사용자 추가
-    @Test
-    void successAddUserToQueue() {
-        // Given
-        String userId = USER_ID;
-
-        when(userQueueRepository.checkIfUserInQueueWithStatus(userId, QueueStatus.EXPIRE.name())).thenReturn(true);
-
-        UserQueueEntity userQueueEntity = new UserQueueEntity();
-        when(userQueueRepository.getQueueInfo(userId)).thenReturn(userQueueEntity);
-
-        when(userQueueRepository.checkIfUserInQueue(userId)).thenReturn(false);
+        UserEntity userEntity = new UserEntity(userId, initialPoints);
+        given(userRepository.getUserInfo(userId)).willReturn(Optional.of(userEntity));
 
         // When
-        userService.addQueue(userId);
+        User result = userService.updateRechargePoints(userId, amountToAdd);
 
         // Then
-        verify(userQueueRepository, times(1)).save(any(UserQueueEntity.class));
-
-        verify(userQueueRepository, times(1)).checkIfUserInQueueWithStatus(userId, QueueStatus.EXPIRE.name());
-        verify(userQueueRepository, times(1)).checkIfUserInQueue(userId);
+        assertEquals(initialPoints + amountToAdd, result.getPoints());
+        verify(userRepository, times(1)).changeUserInfo(any(UserEntity.class));
     }
 
-    // 성공 케이스 02 - 대기열 테이블 내 사용자 상태 변경
     @Test
-    void successUpdateQueueStatus() {
+    void updateUsePoints_Success() {
         // Given
-        String userId = USER_ID;
-
-        when(userQueueRepository.checkIfUserInQueueWithStatus(userId, QueueStatus.EXPIRE.name())).thenReturn(true);
-
-        UserQueueEntity userQueueEntity = UserQueueEntity.builder()
-                .queueId(1L)
-                .userId(userId)
-                .queueStatus(QueueStatus.EXPIRE.name())
-                .build();
-
-        when(userQueueRepository.getQueueInfo(userId)).thenReturn(userQueueEntity);
+        UserEntity userEntity = new UserEntity(userId, initialPoints);
+        given(userRepository.getUserInfo(userId)).willReturn(Optional.of(userEntity));
 
         // When
-        userService.addQueue(userId);
+        User result = userService.updateUsePoints(userId, amountToUse);
 
         // Then
-        verify(userQueueRepository).save(any(UserQueueEntity.class));
+        assertEquals(initialPoints - amountToUse, result.getPoints());
+        verify(userRepository, times(1)).changeUserInfo(any(UserEntity.class));
     }
 
-    // 성공 케이스 03 - 폴링용 API
     @Test
-    void successCountQueues() {
+    void updateUsePoints_Failure_InsufficientPoints() {
         // Given
-        String userId = USER_ID;
+        UserEntity userEntity = new UserEntity(userId, 50L); // insufficient points
+        given(userRepository.getUserInfo(userId)).willReturn(Optional.of(userEntity));
 
-        UserQueueEntity userQueueEntity = UserQueueEntity.builder()
-                .queueId(1L)
-                .userId(userId)
-                .queueStatus(QueueStatus.STANDBY.name())
-                .build();
+        // When & Then
+        Exception exception = assertThrows(IllegalStateException.class, () -> userService.updateUsePoints(userId, amountToUse));
+        assertEquals("Insufficient points.", exception.getMessage());
+        verify(userRepository, never()).changeUserInfo(any(UserEntity.class));
+    }
 
-        when(userQueueRepository.getQueueInfo(userId)).thenReturn(userQueueEntity);
-        when(userQueueRepository.countByQueue(userQueueEntity.getCreateAt())).thenReturn(5);
+    @Test
+    void updateUsePoints_Failure_NegativePoints() {
+        // Given
+        UserEntity userEntity = new UserEntity(userId, initialPoints);
+        given(userRepository.getUserInfo(userId)).willReturn(Optional.of(userEntity));
 
-        // When
-        int queueCount = userService.countQueues(userId);
-
-        // Then
-        assertEquals(5, queueCount);
-    }*/
+        // When & Then
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> userService.updateUsePoints(userId, -amountToUse));
+        assertEquals("Points to use must be positive.", exception.getMessage());
+        verify(userRepository, never()).changeUserInfo(any(UserEntity.class));
+    }
 
 }

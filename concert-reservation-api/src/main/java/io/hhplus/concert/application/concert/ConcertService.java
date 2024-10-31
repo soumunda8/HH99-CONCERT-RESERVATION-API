@@ -2,7 +2,6 @@ package io.hhplus.concert.application.concert;
 
 import io.hhplus.concert.domain.concert.Concert;
 import io.hhplus.concert.domain.concert.ConcertRepository;
-import io.hhplus.concert.infrastructure.entity.concert.ConcertEntity;
 import io.hhplus.concert.infrastructure.mapper.concert.ConcertMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
