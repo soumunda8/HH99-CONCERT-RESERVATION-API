@@ -1,9 +1,9 @@
 package io.hhplus.concert.application.user;
 
-import io.hhplus.concert.domain.user.QueueStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AddUserToQueueUseCase {
@@ -18,6 +18,7 @@ public class AddUserToQueueUseCase {
         this.userService = userService;
     }
 
+    @Transactional
     public void execute(String userId) {
         logger.info("Attempting to add user to queue with userId: {}", userId);
 

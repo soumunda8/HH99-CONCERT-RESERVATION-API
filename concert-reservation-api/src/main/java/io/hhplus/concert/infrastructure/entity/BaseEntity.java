@@ -19,4 +19,8 @@ public class BaseEntity {
     @Column(updatable = false, nullable = false)
     private LocalDateTime createAt;
 
+    @PrePersist
+    public void prePersist() {
+        this.createAt = LocalDateTime.now();
+    }
 }

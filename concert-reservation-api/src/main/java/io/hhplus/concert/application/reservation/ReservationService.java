@@ -27,12 +27,9 @@ public class ReservationService {
     public void updateExpiredReservations() {
         logger.info("Starting process to update expired reservations.");
 
-        List<ReservationEntity> expiredReservations = reservationRepository.getReservationInfoByStatusBooked(
-                ReservationStatus.BOOKED.name(), LocalDateTime.now());
+        List<ReservationEntity> expiredReservations = reservationRepository.getReservationInfoByStatusBooked(ReservationStatus.BOOKED.name(), LocalDateTime.now());
 
-        expiredReservations.forEach(reservation ->
-                canceledReservationStatus(reservation.getReservationId())
-        );
+        expiredReservations.forEach(reservation -> canceledReservationStatus(reservation.getReservationId()));
 
         logger.info("Expired reservations update process completed.");
     }
@@ -66,10 +63,8 @@ public class ReservationService {
         logger.info("Reservation status updated to {} for reservation ID: {}", reservationStatus, reservationId);
     }
 
-    public Reservation addReservation(Long seatId, String userId) {
-        Reservation reservation = new Reservation(
-                null, userId, seatId, ReservationStatus.BOOKED, LocalDateTime.now(), LocalDateTime.now().plusMinutes(10)
-        );
+    public Reservation addNewReservation(Long seatId, String userId) {
+        Reservation reservation = new Reservation(null, userId, seatId, ReservationStatus.BOOKED, LocalDateTime.now(), LocalDateTime.now().plusMinutes(10));
 
         ReservationEntity savedReservation = reservationRepository.addReservation(ReservationMapper.toEntity(reservation));
         logger.info("New reservation added with ID: {}", savedReservation.getReservationId());

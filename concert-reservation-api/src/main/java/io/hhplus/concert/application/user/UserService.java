@@ -33,14 +33,19 @@ public class UserService {
 
     public User updateRechargePoints(String userId, long amount) {
         User user = getUserInfo(userId);
-        user.addPoints(amount);
+        //user.addPoints(amount);
+        user.addPoints(Math.abs(amount));
         saveUserToDatabase(user);
         return user;
     }
 
     public User updateUsePoints(String userId, long amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Points to use must be positive.");
+        }
         User user = getUserInfo(userId);
-        user.usePoints(amount);
+        //user.usePoints(amount);
+        user.usePoints(Math.abs(amount));
         saveUserToDatabase(user);
         return user;
     }

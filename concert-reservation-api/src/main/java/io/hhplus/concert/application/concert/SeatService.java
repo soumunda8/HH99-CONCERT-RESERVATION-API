@@ -76,8 +76,8 @@ public class SeatService {
 
         Seat seat = findSeatByNumber(seatNumber);
 
-        if (seat.getSeatStatus() == SeatStatus.DONE) {
-            logger.warn("Seat with number {} is already reserved", seatNumber);
+        if (seat.getSeatStatus() != SeatStatus.AVAILABLE) {
+            logger.warn("Seat with number {} is not available for reservation", seatNumber);
             throw new IllegalArgumentException("이미 예약된 좌석입니다.");
         }
 

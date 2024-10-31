@@ -8,8 +8,10 @@ import io.hhplus.concert.application.user.UserService;
 import io.hhplus.concert.domain.concert.Concert;
 import io.hhplus.concert.domain.concert.ConcertSchedule;
 import io.hhplus.concert.domain.concert.Seat;
+import io.hhplus.concert.domain.concert.SeatStatus;
 import io.hhplus.concert.domain.reservation.Reservation;
 import io.hhplus.concert.domain.reservation.ReservationStatus;
+import io.hhplus.concert.domain.user.PointActionType;
 import io.hhplus.concert.domain.user.User;
 import io.hhplus.concert.infrastructure.entity.concert.ConcertEntity;
 import io.hhplus.concert.infrastructure.entity.concert.ConcertScheduleEntity;
@@ -46,8 +48,16 @@ public class ProcessPaymentUseCase {
     public Long execute(Long reservationId, String userId) {
         logger.info("Processing payment for reservationId: {}, userId: {}", reservationId, userId);
 
+        // 예약 정보 및 좌석 정보 조회
         Reservation reservation = reservationService.getReservationInfo(reservationId);
         Seat seat = seatService.getSeatInfo(reservation.getSeatId());
+
+        // 좌석 상태가 HELD인지 확인
+        if (!seat.getSeatStatus().equals(SeatStatus.HELD)) {
+            logger.warn("Seat status is not HELD for seatId: {}", seat.getSeatId());
+            throw new IllegalStateException("결제를 진행할 수 없는 좌석 상태입니다.");
+        }
+
         ConcertSchedule concertSchedule = concertScheduleService.getConcertScheduleInfo(seat.getConcertScheduleId());
         Concert concert = concertService.getConcertInfo(concertSchedule.getConcertId());
 
@@ -61,7 +71,7 @@ public class ProcessPaymentUseCase {
         }
 
         userService.updateUsePoints(userId, totalAmount);
-        userPointHistoryService.updateUsePointsHistory(userId, totalAmount);
+        userPointHistoryService.updatePointsHistory(userId, PointActionType.USE,totalAmount);
         reservationService.paidReservationStatus(reservationId);
 
         logger.info("Payment processed successfully for reservationId: {}, userId: {}. Remaining points: {}", reservationId, userId, userPoints - totalAmount);

@@ -1,9 +1,8 @@
 package io.hhplus.concert.application.user.scheduler;
 
 import io.hhplus.concert.application.user.UserQueueService;
-import io.hhplus.concert.application.user.scheduler.UserQueueScheduler;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;

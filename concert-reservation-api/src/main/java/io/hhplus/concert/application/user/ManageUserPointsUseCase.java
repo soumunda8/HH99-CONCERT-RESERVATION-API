@@ -25,25 +25,25 @@ public class ManageUserPointsUseCase {
         logger.info("Starting point management for userId: {}, actionType: {}", userId, actionType);
 
         switch (actionType) {
-            case "check":
+            case "CHECK":
                 return userService.getUserInfo(userId);
 
             case "CHARGE":
-                User chargedUser = userService.updateRechargePoints(userId, amount);
-                userPointHistoryService.updateChargePointsHistory(userId, amount);
-                logger.info("Points charged for userId: {}", userId);
-                return chargedUser;
+                userService.updateRechargePoints(userId, amount);
+                userPointHistoryService.updatePointsHistory(userId, PointActionType.CHARGE, amount);
+                break;
 
             case "USE":
-                User updatedUser = userService.updateUsePoints(userId, amount);
-                userPointHistoryService.updateUsePointsHistory(userId, amount);
-                logger.info("Points used for userId: {}", userId);
-                return updatedUser;
+                userService.updateUsePoints(userId, amount);
+                userPointHistoryService.updatePointsHistory(userId, PointActionType.USE, amount);
+                break;
 
             default:
                 logger.warn("Unsupported actionType: {} for userId: {}", actionType, userId);
                 throw new IllegalArgumentException("지원되지 않는 actionType입니다.");
         }
+
+        return userService.getUserInfo(userId); // For consistency after point management
     }
 
 }

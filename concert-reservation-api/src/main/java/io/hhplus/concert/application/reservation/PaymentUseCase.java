@@ -30,14 +30,23 @@ public class PaymentUseCase {
         logger.info("Payment process started for reservationId: {}, userId: {}", reservationId, userId);
 
         try {
-            checkUserStatusUseCase.execute(userId);
-
+            // 결제 시간 초과 여부 먼저 확인
             Reservation reservation = reservationService.getReservationInfo(reservationId);
+
+            if (reservation == null) {
+                logger.error("Reservation not found for reservationId: {}", reservationId);
+                throw new IllegalArgumentException("예약 정보를 찾을 수 없습니다.");
+            }
+
             if (reservation.getReservationExpireAt().isBefore(LocalDateTime.now())) {
                 logger.warn("Payment expired for reservationId: {}", reservationId);
                 throw new IllegalArgumentException("결제 시간 초과");
             }
 
+            // 결제 만료가 아닌 경우에만 사용자 상태 확인
+            checkUserStatusUseCase.execute(userId);
+
+            // 결제 처리 및 큐 제거
             processPaymentUseCase.execute(reservationId, userId);
             userQueueService.removeUserQueueToken(userId);
             logger.info("Payment completed and user queue token removed for reservationId: {}, userId: {}", reservationId, userId);

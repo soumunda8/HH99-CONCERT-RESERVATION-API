@@ -19,15 +19,15 @@ public class UserPointHistoryService {
         this.userPointHistoryRepository = userPointHistoryRepository;
     }
 
-    public void updateChargePointsHistory(String userId, long amount) {
+    public void updatePointsHistory(String userId, PointActionType pointActionType, long amount) {
         logger.info("Recording charge points history for userId: {}", userId);
-        saveUserPointHistory(new UserPointHistory(null, userId, PointActionType.CHARGE, amount));
+        saveUserPointHistory(new UserPointHistory(null, userId, pointActionType, amount));
     }
 
-    public void updateUsePointsHistory(String userId, long amount) {
+    /*public void updateUsePointsHistory(String userId, long amount) {
         logger.info("Recording use points history for userId: {}", userId);
-        saveUserPointHistory(new UserPointHistory(null, userId, PointActionType.USE, -amount));
-    }
+        saveUserPointHistory(new UserPointHistory(null, userId, PointActionType.USE, amount));
+    }*/
 
     private void saveUserPointHistory(UserPointHistory userPointHistory) {
         UserPointHistoryEntity pointHistoryEntity = UserPointHistoryMapper.toEntity(userPointHistory);
