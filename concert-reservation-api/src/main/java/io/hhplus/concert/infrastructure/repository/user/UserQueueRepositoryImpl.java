@@ -2,6 +2,8 @@ package io.hhplus.concert.infrastructure.repository.user;
 
 import io.hhplus.concert.domain.user.UserQueueRepository;
 import io.hhplus.concert.infrastructure.entity.user.UserQueueEntity;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -11,6 +13,9 @@ import java.util.Optional;
 
 @Repository
 public class UserQueueRepositoryImpl implements UserQueueRepository {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private final JpaUserQueueRepository jpaUserQueueRepository;
 
@@ -35,7 +40,7 @@ public class UserQueueRepositoryImpl implements UserQueueRepository {
 
     @Override
     public Optional<UserQueueEntity> getQueueInfo(String userId) {
-        return jpaUserQueueRepository.findByUserId(userId);
+        return jpaUserQueueRepository.findTop1ByUserIdOrderByQueueExpireAtDesc(userId);
     }
 
     @Override
@@ -63,4 +68,10 @@ public class UserQueueRepositoryImpl implements UserQueueRepository {
     public List<UserQueueEntity> getTop10UserStatusByExpireAt(String queueStatus, LocalDateTime expireAt) {
         return jpaUserQueueRepository.findTop10ByQueueStatusAndQueueExpireAtBeforeOrderByQueueExpireAtAsc(queueStatus, expireAt);
     }
+
+    @Override
+    public void removeAllData() {
+        jpaUserQueueRepository.deleteAll();
+    }
+
 }

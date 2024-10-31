@@ -16,7 +16,7 @@ public interface JpaUserQueueRepository extends JpaRepository<UserQueueEntity, L
 
     boolean existsByUserIdAndQueueStatusNot(String userId, String queueStatus);
 
-    Optional<UserQueueEntity> findByUserId(String userId);
+    Optional<UserQueueEntity> findTop1ByUserIdOrderByQueueExpireAtDesc(String userId);
 
     int countByQueueStatusInAndCreateAtBefore(List<String> queueStatuses, LocalDateTime createAt);
 

@@ -17,5 +17,6 @@ public interface UserQueueRepository {
     int countByQueue(LocalDateTime createAt);
     List<UserQueueEntity> getAllByUserStatusByCreateAt(String queueStatus, LocalDateTime createAt);
     List<UserQueueEntity> getTop10UserStatusByExpireAt(String queueStatus, LocalDateTime expireAt);
+    void removeAllData();
 
 }
