@@ -18,6 +18,9 @@ public class UserEntity {
     @Column(nullable = false)
     private Long points;
 
+    @Version
+    private Integer version;
+
     @Builder
     public UserEntity(String userId, Long points) {
         this.userId = userId;
