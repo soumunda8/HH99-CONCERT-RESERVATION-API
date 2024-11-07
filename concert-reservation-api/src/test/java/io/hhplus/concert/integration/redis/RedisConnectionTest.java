@@ -1,6 +1,6 @@
 package io.hhplus.concert.integration.redis;
 
-import io.hhplus.concert.domain.user.RedisRepository;
+import io.hhplus.concert.domain.user.RedisQueueRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +17,7 @@ public class RedisConnectionTest {
     private RedisConnectionFactory redisConnectionFactory;
 
     @Autowired
-    private RedisRepository redisRepository;
+    private RedisQueueRepository redisRepository;
 
     @Test
     public void testRedisConnection() {
