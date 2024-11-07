@@ -92,5 +92,5 @@ public boolean isTokenActiveWithIndividualTTL(String userId) {
 - **DB 트랜잭션 감소**: Redis에 대기열 관련 정보를 저장함으로써 DB에서의 트랜잭션을 최소화하여 안정성을 높입니다.
 
 ## 5. 결론
-Redis의 Sorted Sets와 Sets 또는 Strings를 통한 대기열 및 Active Token 관리는 반복적인 데이터 조회와 상태 업데이트의 효율성을 높여 응답 시간을 크게 줄일 수 있는 방안입니다. **개별 사용자별 TTL 설정을 위해 Redis Strings을 사용하는 것이 적합하다**는 설명을 추가했습니다.
+Redis의 Sorted Sets와 Sets 또는 Strings를 통한 대기열 및 Active Token 관리는 반복적인 데이터 조회와 상태 업데이트의 효율성을 높여 응답 시간을 크게 줄일 수 있는 방안입니다. **개별 사용자별 TTL 설정을 위해 Redis Strings을 사용하는 것이 적합하다고 결정했습니다.**
 
