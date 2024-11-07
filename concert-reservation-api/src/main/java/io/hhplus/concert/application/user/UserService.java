@@ -30,7 +30,7 @@ public class UserService {
     }
 
     public User addUser(String userId) {
-        return addUserDB(userId, 0L);
+        return addUserDB(userId, 10L);
     }
 
     public User updateRechargePoints(String userId, long amount) {
