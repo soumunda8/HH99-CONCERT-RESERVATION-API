@@ -1,11 +1,11 @@
-package io.hhplus.concert.integration;
+package io.hhplus.concert.integration.redis;
 
+import io.hhplus.concert.domain.user.RedisRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
@@ -17,7 +17,7 @@ public class RedisConnectionTest {
     private RedisConnectionFactory redisConnectionFactory;
 
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisRepository redisRepository;
 
     @Test
     public void testRedisConnection() {
@@ -31,9 +31,9 @@ public class RedisConnectionTest {
 
     @Test
     public void testRedisData() {
-        redisTemplate.opsForValue().set("testKey", "testValue");
+        redisRepository.saveToQueue("testKey", "testValue");
 
-        String value = redisTemplate.opsForValue().get("testKey");
+        String value = redisRepository.getFromQueue("testKey");
         assertThat(value).isEqualTo("testValue");
     }
 
