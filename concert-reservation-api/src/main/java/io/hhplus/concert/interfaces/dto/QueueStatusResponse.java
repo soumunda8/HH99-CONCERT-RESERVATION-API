@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class QueueStatusResponse {
 
     private String userId;
-    private int position;
+    private Long position;
 
 }
