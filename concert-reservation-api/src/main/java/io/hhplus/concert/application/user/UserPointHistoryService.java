@@ -24,11 +24,6 @@ public class UserPointHistoryService {
         saveUserPointHistory(new UserPointHistory(null, userId, pointActionType, amount));
     }
 
-    /*public void updateUsePointsHistory(String userId, long amount) {
-        logger.info("Recording use points history for userId: {}", userId);
-        saveUserPointHistory(new UserPointHistory(null, userId, PointActionType.USE, amount));
-    }*/
-
     private void saveUserPointHistory(UserPointHistory userPointHistory) {
         UserPointHistoryEntity pointHistoryEntity = UserPointHistoryMapper.toEntity(userPointHistory);
         userPointHistoryRepository.addInfo(pointHistoryEntity);

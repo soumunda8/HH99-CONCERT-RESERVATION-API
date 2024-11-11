@@ -54,10 +54,10 @@ public class UserController {
     }
 
     // 3. 대기열 상태 확인 API
-    @GetMapping("/queue/{userId}/{queueId}")
-    public ResponseEntity<QueueStatusResponse> checkQueueStatus(@PathVariable String userId, @PathVariable Long queueId) {
+    @GetMapping("/queue/{userId}")
+    public ResponseEntity<QueueStatusResponse> checkQueueStatus(@PathVariable String userId) {
         try {
-            int position = countUserQueueUseCase.execute(userId);
+            Long position = countUserQueueUseCase.execute(userId);
             QueueStatusResponse response = new QueueStatusResponse(userId, position);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {

@@ -21,9 +21,9 @@ public class QueueTokenInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String queueIdStr = request.getParameter("queueId");
+        String userId = request.getParameter("userId");
 
-        if (queueIdStr == null) {
+        if (userId == null) {
             logger.warn("Request missing token parameter. Rejecting access.");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Missing token");
@@ -31,17 +31,17 @@ public class QueueTokenInterceptor implements HandlerInterceptor {
         }
 
         try {
-            Long queueId = Long.parseLong(queueIdStr);
+            //Long queueId = Long.parseLong(queueIdStr);
 
-            if (!userQueueService.isValidQueueToken(queueId)) {
-                logger.warn("Invalid or expired token for queueId: {}", queueId);
+            if (!userQueueService.isUserInQueue(userId)) {
+                logger.warn("Invalid or expired token for userId: {}", userId);
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Invalid or expired token");
                 return false;
             }
 
         } catch (NumberFormatException e) {
-            logger.warn("Invalid token format: {}", queueIdStr);
+            logger.warn("Invalid token format: {}", userId);
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("Invalid token format");
             return false;
