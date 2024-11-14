@@ -52,9 +52,10 @@ public class PaymentUseCase {
             // 결제 만료가 아닌 경우에만 사용자 상태 확인
             checkUserStatusUseCase.execute(userId);
 
-            // 결제 처리 및 큐 제거
+            // 결제 처리
             processPaymentUseCase.execute(reservationId, userId);
 
+            // 큐 제거 : event listener
             eventPublisher.publishEvent(new PaymentCompletedEvent(this, userId));
 
             logger.info("Payment completed and user queue token removed for reservationId: {}, userId: {}", reservationId, userId);
