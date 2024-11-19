@@ -8,7 +8,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import static org.mockito.Mockito.verify;
 
-public class KafkaProducerServiceTest {
+public class KafkaProducerTest {
 
     @Test
     public void testSendMessage() {

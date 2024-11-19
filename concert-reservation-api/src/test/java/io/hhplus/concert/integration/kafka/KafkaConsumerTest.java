@@ -6,7 +6,7 @@ import org.mockito.Mockito;
 
 import static org.mockito.Mockito.verify;
 
-public class KafkaConsumerServiceTest {
+public class KafkaConsumerTest {
 
     @Test
     public void testConsumeMessage() {
