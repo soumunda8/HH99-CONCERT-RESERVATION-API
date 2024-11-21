@@ -19,6 +19,18 @@ spring:
     hibernate:
       ddl-auto: update
     database-platform: org.hibernate.dialect.MariaDBDialect
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: message-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 logging:
   config: classpath:logback.xml
+#  level:
+#    org.springframework.kafka: DEBUG
